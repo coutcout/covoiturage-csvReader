@@ -37,6 +37,8 @@ func TestParse(t *testing.T) {
 
 	tests := []tmplTest{
 		{"nominal_case", "dataset_1.csv", 3},
+		{"nominal_case", "dataset_empty.csv", 0},
+		{"nominal_case", "dataset_headersOnly.csv", 0},
 	}
 
 	for _, test := range tests {
