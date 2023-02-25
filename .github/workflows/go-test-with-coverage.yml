@@ -4,10 +4,6 @@
 name: Go - Test with coverage
 
 on:
-  push:
-    banches:
-      - main
-      - "release/**"
   pull_request:
     banches:
       - main
