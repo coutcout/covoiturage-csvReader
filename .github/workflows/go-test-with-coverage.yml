@@ -8,6 +8,9 @@ on:
     banches:
       - main
       - "release/**"
+  push:
+    branches:
+      - "release/**"
 
 
 jobs:
