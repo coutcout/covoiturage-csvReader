@@ -5,6 +5,9 @@ name: Go - Test with coverage
 
 on:
   push:
+    banches:
+      - main
+      - "release/**"
   pull_request:
     banches:
       - main
@@ -32,7 +35,7 @@ jobs:
 
         # Ignore code-generated files when calculating coverage totals
         ignore-pattern: |
-          mocks\\[a-zA-Z]*?\.go$
+          ^me\/coutcout\/covoiturage\/mocks
         
         # A url that the html report will be accessible at, once your
         # workflow uploads it.  Used in the pull request comment.
