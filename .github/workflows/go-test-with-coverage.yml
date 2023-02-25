@@ -5,11 +5,8 @@ name: Go - Test with coverage
 
 on:
   push:
-    banches: ["release/**"]
-  pull_request:
     banches:
       - main
-      - "release/**"
 
 
 jobs:
