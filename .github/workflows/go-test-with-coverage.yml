@@ -36,7 +36,16 @@ jobs:
         # Ignore code-generated files when calculating coverage totals
         ignore-pattern: |
           ^me\/coutcout\/covoiturage\/mocks
-        
-        # A url that the html report will be accessible at, once your
-        # workflow uploads it.  Used in the pull request comment.
-        report-url: https://artifacts.example.com/go-coverage/${{ github.ref_name}}.html
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Test
+      uses: robherley/go-test-action@v0.1.0
+
+      
