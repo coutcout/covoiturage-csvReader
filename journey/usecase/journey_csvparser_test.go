@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
 
+	"me/coutcout/covoiturage/domain"
 	ucase "me/coutcout/covoiturage/journey/usecase"
 	"me/coutcout/covoiturage/mocks"
 )
@@ -37,18 +38,27 @@ func TestParse(t *testing.T) {
 
 	tests := []tmplTest{
 		{"nominal_case", "dataset_1.csv", 3},
-		{"nominal_case", "dataset_empty.csv", 0},
-		{"nominal_case", "dataset_headersOnly.csv", 0},
+		{"empty_file_case", "dataset_empty.csv", 0},
+		{"headers_only_case", "dataset_headersOnly.csv", 0},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			f, _ := os.Open(filepath.Join("testdata", test.filename))
 			defer f.Close()
+			resChan := make(chan *domain.Journey)
+			var nbReadedLines int64 = 0
 
-			res, err := ucase.Parse(&logger, f)
+			err := ucase.Parse(&logger, f, resChan)
+
+			for range resChan {
+				nbReadedLines += 1
+			}
 			assert.NoError(t, err)
-			assert.Equal(t, test.nbAdded, res)
+			assert.Equal(t, test.nbAdded, nbReadedLines)
+			logger.Debugw("End of the test",
+				"file", test.filename,
+			)
 		})
 	}
 

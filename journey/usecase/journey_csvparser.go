@@ -14,7 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func Parse(logger *zap.SugaredLogger, f *os.File) (int64, error) {
+func Parse(logger *zap.SugaredLogger, f *os.File, journeyChan chan<- *domain.Journey) error {
 	logger.Debugw("Start parsing csv file",
 		"file", f.Name(),
 	)
@@ -27,18 +27,16 @@ func Parse(logger *zap.SugaredLogger, f *os.File) (int64, error) {
 		logger.Error("Error reading headers",
 			"error", err,
 		)
+		close(journeyChan)
 		if err.Error() == "EOF" {
-			return 0, nil
+			return nil
 		}
 
-		return 0, err
+		return err
 	}
 
 	numWorkers := 10
 	jobs := make(chan []string, numWorkers)
-	res := make(chan *domain.Journey)
-
-	rs := make([]*domain.Journey, 0)
 
 	var workerGroup sync.WaitGroup
 
@@ -64,7 +62,7 @@ func Parse(logger *zap.SugaredLogger, f *os.File) (int64, error) {
 		workerGroup.Add(1)
 		go func() {
 			defer workerGroup.Done()
-			worker(jobs, res)
+			worker(jobs, journeyChan)
 		}()
 	}
 
@@ -87,20 +85,11 @@ func Parse(logger *zap.SugaredLogger, f *os.File) (int64, error) {
 
 	go func() {
 		workerGroup.Wait()
-		close(res)
+		logger.Debug("Closing channel")
+		close(journeyChan)
 	}()
 
-	nbReadLine := 0
-	for r := range res {
-		logger.Debugw("New line read",
-			"resLine", r,
-		)
-
-		rs = append(rs, r)
-		nbReadLine++
-	}
-
-	return int64(nbReadLine), nil
+	return nil
 }
 
 func parseJourney(r []string) *domain.Journey {
