@@ -12,6 +12,7 @@
         "golang.go"
     ],
     "dockerFile": "Dockerfile",
+    "postCreateCommand": "bash /home/user/postCreate.sh",
     "settings": {
         "files.exclude": {
             "**/CODE_OF_CONDUCT.md": true,
