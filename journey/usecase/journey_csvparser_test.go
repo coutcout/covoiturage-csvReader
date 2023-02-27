@@ -47,12 +47,12 @@ func TestParse(t *testing.T) {
 			f, _ := os.Open(filepath.Join("testdata", test.filename))
 			defer f.Close()
 			resChan := make(chan *domain.Journey)
-			var nbReadedLines int64 = 0
+			var nbReadedLines int64
 
 			err := ucase.Parse(&logger, f, resChan)
 
 			for range resChan {
-				nbReadedLines += 1
+				nbReadedLines++
 			}
 			assert.NoError(t, err)
 			assert.Equal(t, test.nbAdded, nbReadedLines)
