@@ -7,8 +7,8 @@ import (
 )
 
 type Journey struct {
-	JourneyId              int64
-	TripId                 uuid.UUID
+	JourneyID              int64
+	TripID                 uuid.UUID
 	JourneyStartDatetime   time.Time
 	JourneyStartDate       time.Time
 	JourneyStartTime       time.Time

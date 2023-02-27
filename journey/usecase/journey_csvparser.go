@@ -14,6 +14,14 @@ import (
 	"go.uber.org/zap"
 )
 
+
+// Parse a csv file into journeys. If there is an error reading the file or parsing the headers it will return an error
+// 
+// @param logger - logger to use for logging
+// @param f - file to read from ( os. File )
+// @param journeyChan - channel to send the parsed journeys
+// 
+// @return error or nil if
 func Parse(logger *zap.SugaredLogger, f *os.File, journeyChan chan<- *domain.Journey) error {
 	logger.Debugw("Start parsing csv file",
 		"file", f.Name(),
@@ -42,6 +50,7 @@ func Parse(logger *zap.SugaredLogger, f *os.File, journeyChan chan<- *domain.Jou
 
 	worker := func(jobs <-chan []string, results chan<- *domain.Journey) {
 		logger.Debug("Worker started")
+		// This is a loop that reads the job from the jobs channel and parses the job data.
 		for {
 			select {
 			case job, ok := <-jobs:
@@ -114,8 +123,8 @@ func parseJourney(r []string) *domain.Journey {
 	hasIncentive := r[28] == "OUI"
 
 	journey := &domain.Journey{
-		JourneyId:              journeyId,
-		TripId:                 tripId,
+		JourneyID:              journeyId,
+		TripID:                 tripId,
 		JourneyStartDatetime:   startDateTime,
 		JourneyStartDate:       startDate,
 		JourneyStartTime:       startTime,
