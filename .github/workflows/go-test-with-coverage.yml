@@ -50,4 +50,6 @@ jobs:
     - name: Test
       uses: robherley/go-test-action@v0.1.0
 
+    - name: Golang mutation testing
+      uses: rescDev/go-mutesting-action@<version>
       

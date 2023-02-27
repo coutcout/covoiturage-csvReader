@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # install curl, git, ...
 apt-get update
 apt-get install -y curl git jq gcc
