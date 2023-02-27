@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # install gopls, dlv, hey
 echo "Getting development tools"
 go install -v golang.org/x/tools/gopls@latest
