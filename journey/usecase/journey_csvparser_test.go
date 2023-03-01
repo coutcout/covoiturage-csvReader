@@ -7,12 +7,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
 
 	"me/coutcout/covoiturage/domain"
 	ucase "me/coutcout/covoiturage/journey/usecase"
-	"me/coutcout/covoiturage/mocks"
 )
 
 var logger zap.SugaredLogger
@@ -27,9 +25,6 @@ func init() {
 }
 
 func TestParse(t *testing.T) {
-	mockJourneyRepo := new(mocks.JourneyRepositoryInterface)
-	mockJourneyRepo.On("Add", mock.Anything).Return(true, nil)
-
 	type tmplTest struct {
 		name     string
 		filename string
