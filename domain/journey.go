@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"io"
 	"time"
 
 	"github.com/google/uuid"
@@ -36,4 +37,16 @@ type Journey struct {
 	JourneyDistance        int64
 	JourneyDuration        int64
 	HasIncentive           bool
+}
+
+type JourneyRepositoryInterface interface {
+	Add(journey Journey) (bool, error)
+}
+
+type JourneyParser interface {
+	Parse(reader io.Reader, journeyChan chan<- *Journey) error
+}
+
+type JourneyUsecase interface {
+	ImportFromCSVFile(reader io.Reader)
 }

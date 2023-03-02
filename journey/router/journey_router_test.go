@@ -1,4 +1,4 @@
-package route_test
+package router_test
 
 import (
 	"encoding/json"
@@ -13,8 +13,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 
-	"me/coutcout/covoiturage/journey/route"
+	"me/coutcout/covoiturage/journey/router"
 	"me/coutcout/covoiturage/messaging"
+	"me/coutcout/covoiturage/mocks"
 )
 
 var logger zap.SugaredLogger
@@ -30,7 +31,8 @@ func init() {
 
 func TestImportCSVFile(t *testing.T){
 	r := gin.Default()
-	route.SetupRouter(&logger, r)
+	mockJUsecase := new(mocks.JourneyUsecase)
+	router.NewJourneyRouter(&logger, r, mockJUsecase)
 
 	type tmplTest struct {
 		name     	string
@@ -41,7 +43,9 @@ func TestImportCSVFile(t *testing.T){
 	}
 
 	tests := []tmplTest{
-		{"nominal_case", "dataset_1.csv", http.StatusAccepted, route.MSG_FILE_ACCEPTED, []string{}},
+		{"nominal_case", "dataset_1.csv", http.StatusAccepted, router.MSG_FILE_ACCEPTED, []string{}},
+		{"wrong_extension", "dataset_1.txt", http.StatusAccepted, "", []string{"File extension is not accepted"}},
+		{"no_extension", "dataset_1", http.StatusAccepted, "", []string{"File extension is not accepted"}},
 	}
 
 	for _, test := range tests {

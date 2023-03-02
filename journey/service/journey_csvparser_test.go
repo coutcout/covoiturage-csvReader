@@ -1,4 +1,4 @@
-package usecase_test
+package service_test
 
 import (
 	"log"
@@ -10,10 +10,11 @@ import (
 	"go.uber.org/zap"
 
 	"me/coutcout/covoiturage/domain"
-	ucase "me/coutcout/covoiturage/journey/usecase"
+	"me/coutcout/covoiturage/journey/service"
 )
 
 var logger zap.SugaredLogger
+var parser domain.JourneyParser
 
 func init() {
 	newLogger, err := zap.NewDevelopment()
@@ -22,6 +23,7 @@ func init() {
 	}
 
 	logger = *newLogger.Sugar()
+	parser = service.NewJourneyCsvParser(&logger)
 }
 
 func TestParse(t *testing.T) {
@@ -44,7 +46,7 @@ func TestParse(t *testing.T) {
 			resChan := make(chan *domain.Journey)
 			var nbReadedLines int64 = 0
 
-			err := ucase.Parse(&logger, f, resChan)
+			err := parser.Parse(f, resChan)
 
 			for range resChan {
 				nbReadedLines += 1
