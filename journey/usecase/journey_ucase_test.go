@@ -2,12 +2,15 @@ package usecase_test
 
 import (
 	"log"
+	"me/coutcout/covoiturage/journey/service"
 	"me/coutcout/covoiturage/journey/usecase"
 	"me/coutcout/covoiturage/mocks"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
 )
 
@@ -41,14 +44,23 @@ func TestImportFromCSVFile(t *testing.T) {
 			defer f.Close()
 
 			jRepo := new(mocks.JourneyRepositoryInterface)
-			jCsvParser := new(mocks.JourneyParser)
+			jRepo.On("Add", mock.AnythingOfType("*domain.Journey")).Return(true, nil)
+			jCsvParser := service.NewJourneyCsvParser(&logger)
 
 			journeyUsecase := usecase.NewJourneyUsecase(
 				&logger,
 				jRepo,
+			
 				jCsvParser,
 			)
-			journeyUsecase.ImportFromCSVFile(f)
+			nbJourneyImported, err := journeyUsecase.ImportFromCSVFile(f)
+
+			assert.NoError(t, err)
+			assert.Equal(t, test.nbAdded, nbJourneyImported)
+
+			logger.Debugw("End of the test",
+				"file", test.filename,
+			)
 		})
 	}
 

@@ -63,7 +63,7 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 	response := messaging.ResponseMessage{
 		StatusCode: http.StatusAccepted,
 		Message:    "File accepted",
-		Errors:     []string{},
+		Errors:     c.Errors.Errors(),
 	}
 	c.JSON(response.StatusCode, response)
 }

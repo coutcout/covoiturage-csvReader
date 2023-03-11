@@ -40,7 +40,7 @@ type Journey struct {
 }
 
 type JourneyRepositoryInterface interface {
-	Add(journey Journey) (bool, error)
+	Add(journey *Journey) (bool, error)
 }
 
 type JourneyParser interface {
@@ -48,5 +48,5 @@ type JourneyParser interface {
 }
 
 type JourneyUsecase interface {
-	ImportFromCSVFile(reader io.Reader)
+	ImportFromCSVFile(reader io.Reader) (int64, error)
 }

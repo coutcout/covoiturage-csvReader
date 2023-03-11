@@ -14,8 +14,27 @@ type JourneyUsecase struct {
 }
 
 // ImportFromCSVFile provides a mock function with given fields: reader
-func (_m *JourneyUsecase) ImportFromCSVFile(reader io.Reader) {
-	_m.Called(reader)
+func (_m *JourneyUsecase) ImportFromCSVFile(reader io.Reader) (int64, error) {
+	ret := _m.Called(reader)
+
+	var r0 int64
+	var r1 error
+	if rf, ok := ret.Get(0).(func(io.Reader) (int64, error)); ok {
+		return rf(reader)
+	}
+	if rf, ok := ret.Get(0).(func(io.Reader) int64); ok {
+		r0 = rf(reader)
+	} else {
+		r0 = ret.Get(0).(int64)
+	}
+
+	if rf, ok := ret.Get(1).(func(io.Reader) error); ok {
+		r1 = rf(reader)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 type mockConstructorTestingTNewJourneyUsecase interface {

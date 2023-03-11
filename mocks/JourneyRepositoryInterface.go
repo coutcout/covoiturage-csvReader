@@ -14,21 +14,21 @@ type JourneyRepositoryInterface struct {
 }
 
 // Add provides a mock function with given fields: journey
-func (_m *JourneyRepositoryInterface) Add(journey domain.Journey) (bool, error) {
+func (_m *JourneyRepositoryInterface) Add(journey *domain.Journey) (bool, error) {
 	ret := _m.Called(journey)
 
 	var r0 bool
 	var r1 error
-	if rf, ok := ret.Get(0).(func(domain.Journey) (bool, error)); ok {
+	if rf, ok := ret.Get(0).(func(*domain.Journey) (bool, error)); ok {
 		return rf(journey)
 	}
-	if rf, ok := ret.Get(0).(func(domain.Journey) bool); ok {
+	if rf, ok := ret.Get(0).(func(*domain.Journey) bool); ok {
 		r0 = rf(journey)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
-	if rf, ok := ret.Get(1).(func(domain.Journey) error); ok {
+	if rf, ok := ret.Get(1).(func(*domain.Journey) error); ok {
 		r1 = rf(journey)
 	} else {
 		r1 = ret.Error(1)

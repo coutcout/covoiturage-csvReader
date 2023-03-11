@@ -27,13 +27,16 @@ func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Jo
 
 	p.logger.Debug("Reading headers")
 	if _, err := csvReader.Read(); err != nil {
-		p.logger.Error("Error reading headers",
-			"error", err,
-		)
+		
 		close(journeyChan)
 		if err.Error() == "EOF" {
+			p.logger.Info("End of the file")
 			return nil
 		}
+
+		p.logger.Errorw("Error reading headers",
+			"error", err,
+		)
 
 		return err
 	}
