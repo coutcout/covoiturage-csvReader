@@ -49,8 +49,9 @@ func TestImportCSVFile(t *testing.T){
 
 	tests := []tmplTest{
 		{"nominal_case", "dataset_1.csv", http.StatusAccepted, router.MSG_FILE_ACCEPTED, []string{}},
-		//{"wrong_extension", "dataset_1.txt", http.StatusAccepted, "", []string{"File extension is not accepted"}},
-		//{"no_extension", "dataset_1", http.StatusAccepted, "", []string{"File extension is not accepted"}},
+		// {"good_format_wrong_extension", "dataset_1.csv.json", http.StatusAccepted, router.MSG_FILE_ACCEPTED, []string{}},
+		// {"wrong_format", "dataset_1.json", http.StatusBadRequest, "", []string{"This is not a correct CSV formatted file"}},
+		{"file_too_long", "dataset_too_long.csv", http.StatusBadRequest, "", []string{"file dataset_too_long.csv is too big"}},
 	}
 
 	for _, test := range tests {
@@ -74,18 +75,22 @@ func TestImportCSVFile(t *testing.T){
 
 			writer.Close()
 			
-			logger.Debug(body.String())
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest("POST", "/import", body)
 			req.Header.Set("Content-Type", writer.FormDataContentType())
 			r.ServeHTTP(w, req)
 
 			assert.Equal(t, test.statusCode, w.Code)
-			response := messaging.ResponseMessage{} 
+			response := messaging.MultipleResponseMessage{} 
 			json.NewDecoder(w.Body).Decode(&response)
-			assert.Equal(t, response.Message, test.message)
-			assert.Equal(t, response.StatusCode, test.statusCode)
-			assert.ElementsMatch(t, response.Errors, test.errors)
+
+			for _, fileMessage := range response.Files {
+				if fileMessage.Filename == test.filename {
+					assert.Equal(t, test.message, fileMessage.Message)
+					assert.ElementsMatch(t, test.errors, fileMessage.Errors)
+				}
+			}
+			
 		})
 	}
 }

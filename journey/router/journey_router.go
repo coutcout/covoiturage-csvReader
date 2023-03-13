@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"me/coutcout/covoiturage/domain"
 	"me/coutcout/covoiturage/messaging"
 	"mime/multipart"
@@ -45,7 +46,32 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 		c.Error(err)
 	}
 
+	const MAX_UPLOAD_FILE = 1024 * 1024
+	response := messaging.MultipleResponseMessage{
+		Files: []messaging.FileImportResponseMessage{},
+		Data: messaging.FileImportData{
+			TotalImported: len(form.Files),
+		},
+	}
+
 	for _, formFile := range form.Files {
+
+		fileResponse := messaging.FileImportResponseMessage{
+			Filename: formFile.Filename,
+			Imported: true,
+			Errors: []string{},
+		}
+
+		if formFile.Size > MAX_UPLOAD_FILE {
+			err := fmt.Errorf("file %s is too big", formFile.Filename) 
+			c.Error(err)
+			response.Data.NbErrors += 1
+			fileResponse.Imported = false
+			fileResponse.Errors = append(fileResponse.Errors, err.Error())	
+			response.Files = append(response.Files, fileResponse)
+			break;
+		}
+
 		openedFile, err := formFile.Open()
 		if err != nil {
 			j.logger.Errorw("Error importing file",
@@ -54,16 +80,21 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 				"filesize", formFile.Size,
 			)
 			c.Error(err)
+			response.Data.NbErrors += 1
+			fileResponse.Imported = false
+			fileResponse.Errors = append(fileResponse.Errors, err.Error())	
 			break
 		}
 
 		j.journeyUsecase.ImportFromCSVFile(openedFile)
+		response.Data.NbSucceded += 1
 	}
 
-	response := messaging.ResponseMessage{
-		StatusCode: http.StatusAccepted,
-		Message:    "File accepted",
-		Errors:     c.Errors.Errors(),
+	responseStatus := http.StatusAccepted
+	if response.Data.NbErrors > 0 {
+		responseStatus = http.StatusBadRequest
 	}
-	c.JSON(response.StatusCode, response)
+
+	c.JSON(responseStatus, response)
 }
+
