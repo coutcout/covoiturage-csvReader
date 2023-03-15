@@ -44,13 +44,17 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 			"error", err.Error(),
 		)
 		c.Error(err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, messaging.SingleResponseMessage{
+			Errors: []string{"'files' parameter is required"},
+		})
+		return
 	}
 
 	const MAX_UPLOAD_FILE = 1024 * 1024
 	response := messaging.MultipleResponseMessage{
 		Files: []messaging.FileImportResponseMessage{},
 		Data: messaging.FileImportData{
-			TotalImported: len(form.Files),
+			TotalFilesImported: len(form.Files),
 		},
 	}
 
@@ -59,17 +63,17 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 		fileResponse := messaging.FileImportResponseMessage{
 			Filename: formFile.Filename,
 			Imported: true,
-			Errors: []string{},
+			Errors:   []string{},
 		}
 
 		if formFile.Size > MAX_UPLOAD_FILE {
-			err := fmt.Errorf("file %s is too big", formFile.Filename) 
+			err := fmt.Errorf("file %s is too big", formFile.Filename)
 			c.Error(err)
-			response.Data.NbErrors += 1
+			response.Data.NbFilesWithErrors += 1
 			fileResponse.Imported = false
-			fileResponse.Errors = append(fileResponse.Errors, err.Error())	
+			fileResponse.Errors = append(fileResponse.Errors, err.Error())
 			response.Files = append(response.Files, fileResponse)
-			break;
+			break
 		}
 
 		openedFile, err := formFile.Open()
@@ -80,21 +84,32 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 				"filesize", formFile.Size,
 			)
 			c.Error(err)
-			response.Data.NbErrors += 1
+			response.Data.NbFilesWithErrors += 1
 			fileResponse.Imported = false
-			fileResponse.Errors = append(fileResponse.Errors, err.Error())	
+			fileResponse.Errors = append(fileResponse.Errors, err.Error())
 			break
 		}
 
-		j.journeyUsecase.ImportFromCSVFile(openedFile)
-		response.Data.NbSucceded += 1
+		nbLineImported, errors := j.journeyUsecase.ImportFromCSVFile(openedFile)
+		response.Data.NbLineImported += int(nbLineImported)
+		fileResponse.Errors = append(fileResponse.Errors, errors...)
+		fileResponse.NbLineImported = int(nbLineImported)
+		if len(errors) > 0 {
+			response.Data.NbFilesWithErrors += 1
+			if(nbLineImported == 0){
+				fileResponse.Imported = false
+			}
+		} else {
+
+			response.Data.NbFilesSucceded += 1
+		}
+		response.Files = append(response.Files, fileResponse)	
 	}
 
 	responseStatus := http.StatusAccepted
-	if response.Data.NbErrors > 0 {
+	if response.Data.NbLineImported == 0 {
 		responseStatus = http.StatusBadRequest
 	}
 
 	c.JSON(responseStatus, response)
 }
-

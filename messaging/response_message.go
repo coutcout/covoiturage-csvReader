@@ -1,24 +1,25 @@
 package messaging
 
-type SingleResponseMessage struct{
+type SingleResponseMessage struct {
 	Message string
-	Errors []string
+	Errors  []string
 }
 
 type FileImportResponseMessage struct {
 	Filename string
 	Imported bool
-	Message string
-	Errors []string
+	NbLineImported int
+	Errors   []string
 }
 
 type FileImportData struct {
-	TotalImported int
-	NbErrors int
-	NbSucceded int
+	TotalFilesImported int
+	NbFilesWithErrors  int
+	NbFilesSucceded    int
+	NbLineImported	   int
 }
 
-type MultipleResponseMessage struct{
+type MultipleResponseMessage struct {
 	Files []FileImportResponseMessage
-	Data FileImportData
+	Data  FileImportData
 }

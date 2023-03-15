@@ -14,18 +14,9 @@ type JourneyParser struct {
 	mock.Mock
 }
 
-// Parse provides a mock function with given fields: reader, journeyChan
-func (_m *JourneyParser) Parse(reader io.Reader, journeyChan chan<- *domain.Journey) error {
-	ret := _m.Called(reader, journeyChan)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(io.Reader, chan<- *domain.Journey) error); ok {
-		r0 = rf(reader, journeyChan)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
+// Parse provides a mock function with given fields: reader, journeyChan, errorChan
+func (_m *JourneyParser) Parse(reader io.Reader, journeyChan chan<- *domain.Journey, errorChan chan<- string) {
+	_m.Called(reader, journeyChan, errorChan)
 }
 
 type mockConstructorTestingTNewJourneyParser interface {
