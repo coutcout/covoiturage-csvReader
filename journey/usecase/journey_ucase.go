@@ -3,6 +3,7 @@ package usecase
 import (
 	"io"
 	"me/coutcout/covoiturage/domain"
+	"sync"
 
 	"go.uber.org/zap"
 )
@@ -11,6 +12,7 @@ type journeyUsecase struct {
 	logger				*zap.SugaredLogger
 	journeyRepo 		domain.JourneyRepositoryInterface
 	journeyCsvParser 	domain.JourneyParser
+
 }
 
 func NewJourneyUsecase(logger *zap.SugaredLogger, jRepo domain.JourneyRepositoryInterface, jCsvParser domain.JourneyParser) domain.JourneyUsecase {
@@ -21,16 +23,34 @@ func NewJourneyUsecase(logger *zap.SugaredLogger, jRepo domain.JourneyRepository
 	}
 }
 
-func (ucase *journeyUsecase) ImportFromCSVFile(reader io.Reader) (int64, error) {
+func (ucase *journeyUsecase) ImportFromCSVFile(reader io.Reader) (int64, []string) {
 	journeyChan := make(chan *domain.Journey)
-	err := ucase.journeyCsvParser.Parse(reader, journeyChan)
+	errorChan := make(chan string)
+	ucase.journeyCsvParser.Parse(reader, journeyChan, errorChan)
+	errors := []string{}
 
 	nbJourneyImported := 0
-	for j := range journeyChan {
-		if res, err := ucase.journeyRepo.Add(j); err == nil && res {
-			nbJourneyImported += 1
+	var workerGroup sync.WaitGroup
+	
+	workerGroup.Add(1)
+	go func(){
+		defer workerGroup.Done()
+		for j := range journeyChan {
+			if res, err := ucase.journeyRepo.Add(j); err == nil && res {
+				nbJourneyImported += 1
+			}
 		}
-	}
+	}()
 
-	return int64(nbJourneyImported), err
+	workerGroup.Add(1)
+	go func(){
+		defer workerGroup.Done()
+		for e := range errorChan {
+			errors = append(errors, e)
+		}
+	}()
+
+	workerGroup.Wait()
+
+	return int64(nbJourneyImported), errors
 }

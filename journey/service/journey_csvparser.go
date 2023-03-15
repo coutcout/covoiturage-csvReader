@@ -2,8 +2,10 @@ package service
 
 import (
 	"encoding/csv"
+	"fmt"
 	"io"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -21,7 +23,12 @@ func NewJourneyCsvParser(logger *zap.SugaredLogger) domain.JourneyParser {
 	return &journeyCsvParser{logger}
 }
 
-func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Journey) error {
+type job struct {
+	line []string
+	lineNumber int
+}
+
+func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Journey, errorChan chan<- string) {
 	csvReader := csv.NewReader(reader)
 	csvReader.Comma = ';'
 
@@ -31,34 +38,42 @@ func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Jo
 		close(journeyChan)
 		if err.Error() == "EOF" {
 			p.logger.Info("End of the file")
-			return nil
+			close(errorChan)
+			return
 		}
 
 		p.logger.Errorw("Error reading headers",
 			"error", err,
 		)
-
-		return err
+		errorChan <- err.Error()
+		close(errorChan)
+		return
 	}
 
-	numWorkers := 10
-	jobs := make(chan []string, numWorkers)
+	numWorkers := 1
+	jobs := make(chan *job, numWorkers)
 
 	var workerGroup sync.WaitGroup
 
-	worker := func(jobs <-chan []string, results chan<- *domain.Journey) {
+	worker := func(jobs <-chan *job, results chan<- *domain.Journey, errorChan chan<- string) {
 		p.logger.Debug("Worker started")
 		for {
 			select {
-			case job, ok := <-jobs:
-				if !ok {
-					p.logger.Debug("Worker ended")
-					return
-				}
-				p.logger.Debugw("Line received",
-					"csvLine", job,
-				)
-				results <- p.parseJourney(job)
+				case job, ok := <-jobs:
+					if !ok {
+						p.logger.Debug("Worker ended")
+						return
+					}
+					p.logger.Debugw("Line received",
+						"csvLine", job,
+					)
+
+					res, err := p.parseJourney(job.line, job.lineNumber);
+					if  err != nil{
+						errorChan <- err.Error()
+					} else {
+						results <- res
+					}
 			}
 		}
 	}
@@ -68,12 +83,14 @@ func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Jo
 		workerGroup.Add(1)
 		go func() {
 			defer workerGroup.Done()
-			worker(jobs, journeyChan)
+			worker(jobs, journeyChan, errorChan)
 		}()
 	}
 
+	lineNumber := 0
 	go func() {
 		for {
+			lineNumber += 1
 			line, err := csvReader.Read()
 			if err == io.EOF {
 				p.logger.Debug("End of file reached")
@@ -82,23 +99,36 @@ func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Jo
 
 			if err != nil {
 				p.logger.Error("Error reading csv file:", err.Error())
+				errorChan <- err.Error()
 				break
 			}
-			jobs <- line
+			jobs <- &job{
+				line: line,
+				lineNumber: lineNumber,
+			}
 		}
 		close(jobs)
 	}()
 
 	go func() {
 		workerGroup.Wait()
-		p.logger.Debug("Closing channel")
+		p.logger.Debug("Closing channels")
 		close(journeyChan)
+		close(errorChan)
 	}()
 
-	return nil
 }
 
-func (p *journeyCsvParser) parseJourney(r []string) *domain.Journey {
+func (p *journeyCsvParser) parseJourney(r []string, lineNumber int) (journey *domain.Journey, err error) {
+	defer func(){
+		if(recover() != nil){
+			err = fmt.Errorf("problem while parsing a journey: line %d in wrong format", lineNumber)
+			p.logger.Errorw(err.Error(),
+				"line", strings.Join(r, ","),
+			)
+		}
+	}()
+
 	journeyId, _ := strconv.ParseInt(r[0], 10, 64)
 	tripId, _ := uuid.Parse(r[1])
 	startDateTime, _ := time.Parse("2006-01-02T15:04:05-07:00", r[2])
@@ -119,7 +149,7 @@ func (p *journeyCsvParser) parseJourney(r []string) *domain.Journey {
 	duration, _ := strconv.ParseInt(r[27], 10, 64)
 	hasIncentive := r[28] == "OUI"
 
-	journey := &domain.Journey{
+	journey = &domain.Journey{
 		JourneyId:              journeyId,
 		TripId:                 tripId,
 		JourneyStartDatetime:   startDateTime,
@@ -150,5 +180,6 @@ func (p *journeyCsvParser) parseJourney(r []string) *domain.Journey {
 		JourneyDuration:        duration,
 		HasIncentive:           hasIncentive,
 	}
-	return journey
+
+	return journey, nil
 }

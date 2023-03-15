@@ -44,9 +44,9 @@ type JourneyRepositoryInterface interface {
 }
 
 type JourneyParser interface {
-	Parse(reader io.Reader, journeyChan chan<- *Journey) error
+	Parse(reader io.Reader, journeyChan chan<- *Journey, errorChan chan<- string)
 }
 
 type JourneyUsecase interface {
-	ImportFromCSVFile(reader io.Reader) (int64, error)
+	ImportFromCSVFile(reader io.Reader) (int64, []string)
 }

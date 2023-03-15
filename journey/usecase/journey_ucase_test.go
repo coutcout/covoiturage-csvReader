@@ -30,12 +30,14 @@ func TestImportFromCSVFile(t *testing.T) {
 		name     string
 		filename string
 		nbAdded  int64
+		shouldHaveErrors 	 bool
 	}
 
 	tests := []tmplTest{
-		{"nominal_case", "dataset_1.csv", 3},
-		{"empty_file_case", "dataset_empty.csv", 0},
-		{"headers_only_case", "dataset_headersOnly.csv", 0},
+		{"nominal_case", "dataset_1.csv", 3, false},
+		{"empty_file_case", "dataset_empty.csv", 0, false},
+		{"headers_only_case", "dataset_headersOnly.csv", 0, false},
+		{"json", "dataset_1.json", 0, true},
 	}
 
 	for _, test := range tests {
@@ -55,7 +57,11 @@ func TestImportFromCSVFile(t *testing.T) {
 			)
 			nbJourneyImported, err := journeyUsecase.ImportFromCSVFile(f)
 
-			assert.NoError(t, err)
+			if test.shouldHaveErrors {
+				assert.NotEmpty(t, err)
+			} else {
+				assert.Empty(t, err)
+			}
 			assert.Equal(t, test.nbAdded, nbJourneyImported)
 
 			logger.Debugw("End of the test",

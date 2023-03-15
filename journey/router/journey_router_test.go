@@ -49,8 +49,9 @@ func TestImportCSVFile(t *testing.T){
 
 	tests := []tmplTest{
 		{"nominal_case", "dataset_1.csv", http.StatusAccepted, router.MSG_FILE_ACCEPTED, []string{}},
-		// {"good_format_wrong_extension", "dataset_1.csv.json", http.StatusAccepted, router.MSG_FILE_ACCEPTED, []string{}},
+		{"good_format_wrong_extension", "dataset_1.csv.json", http.StatusAccepted, router.MSG_FILE_ACCEPTED, []string{}},
 		// {"wrong_format", "dataset_1.json", http.StatusBadRequest, "", []string{"This is not a correct CSV formatted file"}},
+		// {"wrong_format_good_extension", "dataset_1.json.csv", http.StatusBadRequest, "", []string{"This is not a correct CSV formatted file"}},
 		{"file_too_long", "dataset_too_long.csv", http.StatusBadRequest, "", []string{"file dataset_too_long.csv is too big"}},
 	}
 
