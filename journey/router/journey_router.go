@@ -48,7 +48,7 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 		return
 	}
 
-	const MAX_UPLOAD_FILE = 1024 * 1024 * 1024 * 1024
+	const MAX_UPLOAD_FILE = 1024 * 1024
 	response := messaging.MultipleResponseMessage{
 		Files: []messaging.FileImportResponseMessage{},
 		Data: messaging.FileImportData{
