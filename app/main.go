@@ -13,7 +13,7 @@ import (
 var logger zap.SugaredLogger
 
 func main() {
-	newLogger, _ := zap.NewDevelopment()
+	newLogger, _ := zap.NewProduction()
 	logger = *newLogger.Sugar()
 	r := gin.Default()
 

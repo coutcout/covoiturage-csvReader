@@ -1,3 +1,4 @@
+// Services are utils
 package service
 
 import (
@@ -19,6 +20,7 @@ type journeyCsvParser struct {
 	logger *zap.SugaredLogger
 }
 
+// Constructor
 func NewJourneyCsvParser(logger *zap.SugaredLogger) domain.JourneyParser {
 	return &journeyCsvParser{logger}
 }
@@ -50,7 +52,7 @@ func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Jo
 		return
 	}
 
-	numWorkers := 1
+	numWorkers := 10
 	jobs := make(chan *job, numWorkers)
 
 	var workerGroup sync.WaitGroup
@@ -90,7 +92,7 @@ func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Jo
 	lineNumber := 0
 	go func() {
 		for {
-			lineNumber += 1
+			lineNumber ++
 			line, err := csvReader.Read()
 			if err == io.EOF {
 				p.logger.Debug("End of file reached")
@@ -121,10 +123,11 @@ func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Jo
 
 func (p *journeyCsvParser) parseJourney(r []string, lineNumber int) (journey *domain.Journey, err error) {
 	defer func(){
-		if(recover() != nil){
+		if panicErr := recover(); panicErr != nil{
 			err = fmt.Errorf("problem while parsing a journey: line %d in wrong format", lineNumber)
 			p.logger.Errorw(err.Error(),
 				"line", strings.Join(r, ","),
+				"error", panicErr,
 			)
 		}
 	}()

@@ -1,3 +1,4 @@
+// Manage data
 package repository
 
 import (
@@ -10,6 +11,7 @@ type dbJourneyRepository struct {
 	logger *zap.SugaredLogger
 }
 
+// Constructor
 func NewDbJourneyRepository(logger *zap.SugaredLogger) domain.JourneyRepositoryInterface {
 	return &dbJourneyRepository{
 		logger: logger,

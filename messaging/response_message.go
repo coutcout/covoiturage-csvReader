@@ -1,10 +1,13 @@
+// define message send in http response
 package messaging
 
+// Default response message
 type SingleResponseMessage struct {
 	Message string
 	Errors  []string
 }
 
+// File import description
 type FileImportResponseMessage struct {
 	Filename string
 	Imported bool
@@ -12,6 +15,7 @@ type FileImportResponseMessage struct {
 	Errors   []string
 }
 
+// Import description
 type FileImportData struct {
 	TotalFilesImported int
 	NbFilesWithErrors  int
@@ -19,6 +23,7 @@ type FileImportData struct {
 	NbLineImported	   int
 }
 
+// Message used when files are imported
 type MultipleResponseMessage struct {
 	Files []FileImportResponseMessage
 	Data  FileImportData

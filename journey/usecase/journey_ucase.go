@@ -1,3 +1,4 @@
+// Define all app usecases
 package usecase
 
 import (
@@ -15,6 +16,7 @@ type journeyUsecase struct {
 
 }
 
+// Constructor
 func NewJourneyUsecase(logger *zap.SugaredLogger, jRepo domain.JourneyRepositoryInterface, jCsvParser domain.JourneyParser) domain.JourneyUsecase {
 	return &journeyUsecase{
 		logger: logger,

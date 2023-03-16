@@ -1,3 +1,4 @@
+// Routers defines all the API path
 package router
 
 import (
@@ -11,11 +12,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	MSG_FILE_ACCEPTED = "File accepted"
-)
-
-type Form struct {
+type form struct {
 	Files []*multipart.FileHeader `form:"files" binding:"required"`
 }
 
@@ -24,6 +21,7 @@ type journeyRoute struct {
 	journeyUsecase domain.JourneyUsecase
 }
 
+// Constructor
 func NewJourneyRouter(logger *zap.SugaredLogger, mainRouter *gin.Engine, jUsecase domain.JourneyUsecase) {
 	router := &journeyRoute{
 		logger:         logger,
@@ -37,7 +35,7 @@ func NewJourneyRouter(logger *zap.SugaredLogger, mainRouter *gin.Engine, jUsecas
 }
 
 func (j *journeyRoute) importJourney(c *gin.Context) {
-	var form Form
+	var form form
 	err := c.ShouldBind(&form)
 	if err != nil {
 		j.logger.Errorw("Error importing file",
@@ -50,7 +48,7 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 		return
 	}
 
-	const MAX_UPLOAD_FILE = 1024 * 1024
+	const MAX_UPLOAD_FILE = 1024 * 1024 * 1024 * 1024
 	response := messaging.MultipleResponseMessage{
 		Files: []messaging.FileImportResponseMessage{},
 		Data: messaging.FileImportData{
@@ -69,7 +67,7 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 		if formFile.Size > MAX_UPLOAD_FILE {
 			err := fmt.Errorf("file %s is too big", formFile.Filename)
 			c.Error(err)
-			response.Data.NbFilesWithErrors += 1
+			response.Data.NbFilesWithErrors ++
 			fileResponse.Imported = false
 			fileResponse.Errors = append(fileResponse.Errors, err.Error())
 			response.Files = append(response.Files, fileResponse)
@@ -84,7 +82,7 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 				"filesize", formFile.Size,
 			)
 			c.Error(err)
-			response.Data.NbFilesWithErrors += 1
+			response.Data.NbFilesWithErrors ++
 			fileResponse.Imported = false
 			fileResponse.Errors = append(fileResponse.Errors, err.Error())
 			break
@@ -95,13 +93,13 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 		fileResponse.Errors = append(fileResponse.Errors, errors...)
 		fileResponse.NbLineImported = int(nbLineImported)
 		if len(errors) > 0 {
-			response.Data.NbFilesWithErrors += 1
+			response.Data.NbFilesWithErrors ++
 			if(nbLineImported == 0){
 				fileResponse.Imported = false
 			}
 		} else {
 
-			response.Data.NbFilesSucceded += 1
+			response.Data.NbFilesSucceded ++
 		}
 		response.Files = append(response.Files, fileResponse)	
 	}
