@@ -39,7 +39,7 @@ func (ucase *journeyUsecase) ImportFromCSVFile(reader io.Reader) (int64, []strin
 		defer workerGroup.Done()
 		for j := range journeyChan {
 			if res, err := ucase.journeyRepo.Add(j); err == nil && res {
-				nbJourneyImported += 1
+				nbJourneyImported ++
 			}
 		}
 	}()

@@ -70,7 +70,16 @@ func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Jo
 						"csvLine", job,
 					)
 
-					res, err := p.parseJourney(job.line, job.lineNumber);
+					var res *domain.Journey
+					var err error
+					if len(job.line) == 27{
+						res, err = p.parseJourney27Fields(job.line, job.lineNumber);
+					} else if len(job.line) == 29 {
+						res, err = p.parseJourney29Fields(job.line, job.lineNumber);
+					} else {
+						err = fmt.Errorf("the number of fields (%d) is uncompatible with all the known CSV parsers", len(job.line))
+					}
+
 					if  err != nil{
 						errorChan <- err.Error()
 					} else {
@@ -121,7 +130,71 @@ func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Jo
 
 }
 
-func (p *journeyCsvParser) parseJourney(r []string, lineNumber int) (journey *domain.Journey, err error) {
+func (p *journeyCsvParser) parseJourney27Fields(r []string, lineNumber int) (journey *domain.Journey, err error) {
+	defer func(){
+		if panicErr := recover(); panicErr != nil{
+			err = fmt.Errorf("problem while parsing a journey: line %d in wrong format", lineNumber)
+			p.logger.Errorw(err.Error(),
+				"line", strings.Join(r, ","),
+				"error", panicErr,
+			)
+		}
+	}()
+
+	journeyId, _ := strconv.ParseInt(r[0], 10, 64)
+	tripId, _ := uuid.Parse(r[1])
+	startDateTime, _ := time.Parse("2006-01-02T15:04:05-07:00", r[2])
+	startDate, _ := time.Parse(time.DateOnly, r[3])
+	startTime, _ := time.Parse(time.TimeOnly, r[4])
+	startLon, _ := strconv.ParseUint(r[5], 10, 64)
+	startLat, _ := strconv.ParseUint(r[6], 10, 64)
+	startInsee, _ := strconv.ParseInt(r[7], 10, 64)
+
+	endDateTime, _ := time.Parse("2006-01-02T15:04:05-07:00", r[12])
+	endDate, _ := time.Parse(time.DateOnly, r[13])
+	endTime, _ := time.Parse(time.TimeOnly, r[14])
+	endLon, _ := strconv.ParseUint(r[15], 10, 64)
+	endLat, _ := strconv.ParseUint(r[16], 10, 64)
+	endInsee, _ := strconv.ParseInt(r[17], 10, 64)
+	passagerSeats, _ := strconv.ParseInt(r[22], 10, 16)
+	distance, _ := strconv.ParseInt(r[24], 10, 64)
+	duration, _ := strconv.ParseInt(r[25], 10, 64)
+	hasIncentive := r[26] == "OUI"
+
+	journey = &domain.Journey{
+		JourneyId:              journeyId,
+		TripId:                 tripId,
+		JourneyStartDatetime:   startDateTime,
+		JourneyStartDate:       startDate,
+		JourneyStartTime:       startTime,
+		JourneyStartLon:        startLon,
+		JourneyStartLat:        startLat,
+		JourneyStartInsee:      startInsee,
+		JourneyStartDepartment: r[8],
+		JourneyStartTown:       r[9],
+		JourneyStartTowngroup:  r[10],
+		JourneyStartCountry:    r[11],
+		JourneyEndDatetime:     endDateTime,
+		JourneyEndDate:         endDate,
+		JourneyEndTime:         endTime,
+		JourneyEndLon:          endLon,
+		JourneyEndLat:          endLat,
+		JourneyEndInsee:        endInsee,
+		JourneyEndDepartment:   r[18],
+		JourneyEndTown:         r[19],
+		JourneyEndTowngroup:    r[20],
+		JourneyEndCountry:      r[21],
+		PassengerSeats:         int16(passagerSeats),
+		OperatorClass:          r[23],
+		JourneyDistance:        distance,
+		JourneyDuration:        duration,
+		HasIncentive:           hasIncentive,
+	}
+
+	return journey, nil
+}
+
+func (p *journeyCsvParser) parseJourney29Fields(r []string, lineNumber int) (journey *domain.Journey, err error) {
 	defer func(){
 		if panicErr := recover(); panicErr != nil{
 			err = fmt.Errorf("problem while parsing a journey: line %d in wrong format", lineNumber)

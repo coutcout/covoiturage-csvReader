@@ -36,6 +36,7 @@ func TestImportFromCSVFile(t *testing.T) {
 
 	tests := []tmplTest{
 		{"nominal_case", "dataset_1.csv", 3, false},
+		{"27fields_case", "dataset_27fields.csv", 5, false},
 		{"empty_file_case", "dataset_empty.csv", 0, false},
 		{"headers_only_case", "dataset_headersOnly.csv", 0, false},
 		{"json", "dataset_1.json", 0, true},
