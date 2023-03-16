@@ -1,0 +1,1 @@
+{"go-coverage-action-fmt":1,"coverage_pct":88.11188811188812,"pkg_stats":{"me/coutcout/covoiturage/journey/router":[71.11111111111111],"me/coutcout/covoiturage/journey/service":[94.87179487179486],"me/coutcout/covoiturage/journey/usecase":[100]},"skipped_count":4}
