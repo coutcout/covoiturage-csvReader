@@ -1,6 +1,8 @@
+// Define application model
 package domain
 
 import (
+	"io"
 	"time"
 
 	"github.com/google/uuid"
@@ -36,4 +38,19 @@ type Journey struct {
 	JourneyDistance        int64
 	JourneyDuration        int64
 	HasIncentive           bool
+}
+
+// Repository to manage journey entities
+type JourneyRepositoryInterface interface {
+	Add(journey *Journey) (bool, error)
+}
+
+// Parser to deserialize a journey
+type JourneyParser interface {
+	Parse(reader io.Reader, journeyChan chan<- *Journey, errorChan chan<- string)
+}
+
+// Usecases for a journey
+type JourneyUsecase interface {
+	ImportFromCSVFile(reader io.Reader) (int64, []string)
 }
