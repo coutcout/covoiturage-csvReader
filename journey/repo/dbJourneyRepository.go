@@ -1,20 +1,23 @@
 // Manage data
-package repository
+package repo
 
 import (
 	"me/coutcout/covoiturage/domain"
+	"me/coutcout/covoiturage/configuration"
 
 	"go.uber.org/zap"
 )
 
 type dbJourneyRepository struct {
 	logger *zap.SugaredLogger
+	cfg *configuration.Config
 }
 
 // Constructor
-func NewDbJourneyRepository(logger *zap.SugaredLogger) domain.JourneyRepositoryInterface {
+func NewDbJourneyRepository(logger *zap.SugaredLogger, cfg *configuration.Config) domain.JourneyRepositoryInterface {
 	return &dbJourneyRepository{
 		logger: logger,
+		cfg: cfg,
 	}
 }
 

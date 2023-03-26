@@ -3,6 +3,7 @@ package router
 
 import (
 	"fmt"
+	"me/coutcout/covoiturage/configuration"
 	"me/coutcout/covoiturage/domain"
 	"me/coutcout/covoiturage/messaging"
 	"mime/multipart"
@@ -19,12 +20,14 @@ type form struct {
 type journeyRoute struct {
 	logger         *zap.SugaredLogger
 	journeyUsecase domain.JourneyUsecase
+	cfg *configuration.Config
 }
 
 // Constructor
-func NewJourneyRouter(logger *zap.SugaredLogger, mainRouter *gin.Engine, jUsecase domain.JourneyUsecase) {
+func NewJourneyRouter(logger *zap.SugaredLogger, cfg *configuration.Config, mainRouter *gin.Engine, jUsecase domain.JourneyUsecase) {
 	router := &journeyRoute{
 		logger:         logger,
+		cfg: cfg,
 		journeyUsecase: jUsecase,
 	}
 
@@ -48,7 +51,7 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 		return
 	}
 
-	const MAX_UPLOAD_FILE = 1024 * 1024
+	maxUploadFileSize := j.cfg.Journey.Import.MaxUploadFile * 1024
 	response := messaging.MultipleResponseMessage{
 		Files: []messaging.FileImportResponseMessage{},
 		Data: messaging.FileImportData{
@@ -64,8 +67,8 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 			Errors:   []string{},
 		}
 
-		if formFile.Size > MAX_UPLOAD_FILE {
-			err := fmt.Errorf("file %s is too big", formFile.Filename)
+		if formFile.Size > maxUploadFileSize {
+			err := fmt.Errorf("file %s is too big (current: %d - max: %d)", formFile.Filename, formFile.Size, maxUploadFileSize)
 			c.Error(err)
 			response.Data.NbFilesWithErrors ++
 			fileResponse.Imported = false
@@ -105,7 +108,7 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 	}
 
 	responseStatus := http.StatusAccepted
-	if response.Data.NbLineImported == 0 {
+	if response.Data.NbFilesWithErrors > 0 && response.Data.NbLineImported == 0 {
 		responseStatus = http.StatusBadRequest
 	}
 

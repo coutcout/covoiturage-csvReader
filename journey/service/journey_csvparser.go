@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"me/coutcout/covoiturage/configuration"
 	"me/coutcout/covoiturage/domain"
 
 	"github.com/google/uuid"
@@ -18,11 +19,15 @@ import (
 
 type journeyCsvParser struct {
 	logger *zap.SugaredLogger
+	cfg *configuration.Config
 }
 
 // Constructor
-func NewJourneyCsvParser(logger *zap.SugaredLogger) domain.JourneyParser {
-	return &journeyCsvParser{logger}
+func NewJourneyCsvParser(logger *zap.SugaredLogger, cfg *configuration.Config) domain.JourneyParser {
+	return &journeyCsvParser{
+		logger,
+		cfg,
+	}
 }
 
 type job struct {
@@ -52,7 +57,7 @@ func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Jo
 		return
 	}
 
-	numWorkers := 10
+	numWorkers := p.cfg.Journey.Parser.WorkerPoolSize
 	jobs := make(chan *job, numWorkers)
 
 	var workerGroup sync.WaitGroup

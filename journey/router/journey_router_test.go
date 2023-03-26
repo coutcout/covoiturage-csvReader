@@ -18,12 +18,14 @@ import (
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
 
+	"me/coutcout/covoiturage/configuration"
 	"me/coutcout/covoiturage/journey/router"
 	"me/coutcout/covoiturage/messaging"
 	"me/coutcout/covoiturage/mocks"
 )
 
 var logger zap.SugaredLogger
+var config *configuration.Config
 
 func init() {
 	newLogger, err := zap.NewDevelopment()
@@ -32,12 +34,17 @@ func init() {
 	}
 
 	logger = *newLogger.Sugar()
+
+	config, err = configuration.NewConfig("../../resource/configurations/application-tu.yaml")
+	if err != nil {
+		logger.Error(err)
+	}
 }
 
 func TestImportCSVFile(t *testing.T){
 	r := gin.Default()
 	mockJUsecase := new(mocks.JourneyUsecase)
-	router.NewJourneyRouter(&logger, r, mockJUsecase)
+	router.NewJourneyRouter(&logger, config, r, mockJUsecase)
 
 	type tmplTest struct {
 		name     	string
@@ -110,7 +117,7 @@ func TestImportCSVFile(t *testing.T){
 func TestImportCSVFile_wrongParameter(t *testing.T){
 	r := gin.Default()
 	mockJUsecase := new(mocks.JourneyUsecase)
-	router.NewJourneyRouter(&logger, r, mockJUsecase)
+	router.NewJourneyRouter(&logger, config, r, mockJUsecase)
 	
 	t.Run("Wrong parameter name", func(t *testing.T) {
 		body := &bytes.Buffer{}

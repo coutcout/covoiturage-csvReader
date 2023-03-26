@@ -3,6 +3,7 @@ package usecase
 
 import (
 	"io"
+	"me/coutcout/covoiturage/configuration"
 	"me/coutcout/covoiturage/domain"
 	"sync"
 
@@ -11,15 +12,17 @@ import (
 
 type journeyUsecase struct {
 	logger				*zap.SugaredLogger
+	cfg 				*configuration.Config
 	journeyRepo 		domain.JourneyRepositoryInterface
 	journeyCsvParser 	domain.JourneyParser
 
 }
 
 // Constructor
-func NewJourneyUsecase(logger *zap.SugaredLogger, jRepo domain.JourneyRepositoryInterface, jCsvParser domain.JourneyParser) domain.JourneyUsecase {
+func NewJourneyUsecase(logger *zap.SugaredLogger, cfg *configuration.Config, jRepo domain.JourneyRepositoryInterface, jCsvParser domain.JourneyParser) domain.JourneyUsecase {
 	return &journeyUsecase{
 		logger: logger,
+		cfg: cfg,
 		journeyRepo: jRepo,
 		journeyCsvParser: jCsvParser,
 	}
