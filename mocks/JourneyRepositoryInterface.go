@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	domain "github.com/coutcout/covoiturage-csvReader/domain"
+	domain "github.com/coutcout/covoiturage-csvreader/domain"
 
 	mock "github.com/stretchr/testify/mock"
 )

@@ -6,9 +6,9 @@ import (
 	"mime/multipart"
 	"net/http"
 
-	"github.com/coutcout/covoiturage-csvReader/configuration"
-	"github.com/coutcout/covoiturage-csvReader/domain"
-	"github.com/coutcout/covoiturage-csvReader/messaging"
+	"github.com/coutcout/covoiturage-csvreader/configuration"
+	"github.com/coutcout/covoiturage-csvreader/domain"
+	"github.com/coutcout/covoiturage-csvreader/messaging"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"

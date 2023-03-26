@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/coutcout/covoiturage-csvReader/configuration"
+	"github.com/coutcout/covoiturage-csvreader/configuration"
 
 	"github.com/stretchr/testify/assert"
 )
