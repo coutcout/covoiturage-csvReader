@@ -1,4 +1,4 @@
-// Test routers
+// package router_test tests all the routing configuration
 package router_test
 
 import (

@@ -1,4 +1,4 @@
-// Test application configuration
+// Package configuration_test is used to test application configuration
 package configuration_test
 
 import (

@@ -1,4 +1,4 @@
-// Test usecases
+// package usecase_test tests all the application usecases
 package usecase_test
 
 import (

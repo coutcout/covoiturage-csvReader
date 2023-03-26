@@ -1,4 +1,4 @@
-// Routers defines all the API path
+// package router defines all the API path
 package router
 
 import (
@@ -23,20 +23,29 @@ type journeyRoute struct {
 	cfg *configuration.Config
 }
 
-// Constructor
+
+// NewJourneyRouter creates a new router for journeys.
+// 
+// @param logger - The logger to log to.
+// @param cfg - The configuration of the application. Can be nil.
+// @param mainRouter - The Gin Engine to add routes to.
+// @param jUsecase - The domain.JourneyUsecase to use
 func NewJourneyRouter(logger *zap.SugaredLogger, cfg *configuration.Config, mainRouter *gin.Engine, jUsecase domain.JourneyUsecase) {
 	router := &journeyRoute{
 		logger:         logger,
 		cfg: cfg,
 		journeyUsecase: jUsecase,
 	}
-
-	logger.Debug("Creation of journey routes")
-	mainRouter.POST("/import", func(c *gin.Context) {
+logger.Debug("Creation of journey routes")
+mainRouter.POST("/import", func(c *gin.Context) {
 		router.importJourney(c)
 	})
 }
 
+// importJourney imports files from a file upload
+// 
+// @param j - route to respond to requests to import journeys
+// @param c - gin. Context for request body to be passed
 func (j *journeyRoute) importJourney(c *gin.Context) {
 	var form form
 	err := c.ShouldBind(&form)

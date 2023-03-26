@@ -1,4 +1,4 @@
-// Manage data
+// Package repo manage data
 package repo
 
 import (
@@ -13,7 +13,7 @@ type dbJourneyRepository struct {
 	cfg *configuration.Config
 }
 
-// Constructor
+// NewDbJourneyRepository make an instance of a dbJourneyRepository
 func NewDbJourneyRepository(logger *zap.SugaredLogger, cfg *configuration.Config) domain.JourneyRepositoryInterface {
 	return &dbJourneyRepository{
 		logger: logger,
@@ -21,6 +21,10 @@ func NewDbJourneyRepository(logger *zap.SugaredLogger, cfg *configuration.Config
 	}
 }
 
+// Add adds journey to the repository. Not Implemented yet.
+// 
+// @param r - jouney the journey to be
+// @param journey
 func (r *dbJourneyRepository) Add(journey *domain.Journey) (bool, error) {
 	r.logger.Debugw("Not Implemented yet",
 		"object", journey,

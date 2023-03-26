@@ -1,4 +1,4 @@
-// Test application configuration
+// Package configuration_test is used to test application configuration
 package configuration_test
 
 import (
@@ -11,7 +11,6 @@ import (
 
 func TestParseParameter(t *testing.T) {
 
-	// https://eli.thegreenplace.net/2020/testing-flag-parsing-in-go-programs/
 	var tests = []struct {
 		args []string
 		expectedParams *configuration.Parameters

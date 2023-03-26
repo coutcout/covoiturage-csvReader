@@ -1,4 +1,4 @@
-// Used to configure application
+// Package configuration is used to configure application
 package configuration
 
 import (
@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Config struct define all available application configurations
 type Config struct {
 	Server struct {
 		Host string `yaml:"host"`
@@ -24,6 +25,10 @@ type Config struct {
 	}
 }
 
+
+// NewConfig creates a new Config from a file. The file must be a YAML config file
+// 
+// @param configPath - Path to the configuration file
 func NewConfig(configPath string)(*Config, error){
 	config := &Config{}
 

@@ -1,4 +1,4 @@
-// Services are utils
+// package service define services which are usefull for the application
 package service
 
 import (
@@ -22,7 +22,10 @@ type journeyCsvParser struct {
 	cfg *configuration.Config
 }
 
-// Constructor
+// NewJourneyCsvParser returns a parser for CSV files.
+// 
+// @param logger - the logger to use for logging errors. Must not be nil.
+// @param cfg - the configuration. Config to use for parsing the file
 func NewJourneyCsvParser(logger *zap.SugaredLogger, cfg *configuration.Config) domain.JourneyParser {
 	return &journeyCsvParser{
 		logger,
@@ -35,6 +38,12 @@ type job struct {
 	lineNumber int
 }
 
+// Parse a journey CSV file and send the results to the given channel
+// 
+// @param p - The parser to use for parsing
+// @param reader - CSV File reader
+// @param journeyChan - Channel which will be used to send imported journeys
+// @param errorChan - Channel which will be used to send errors
 func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Journey, errorChan chan<- string) {
 	csvReader := csv.NewReader(reader)
 	csvReader.Comma = ';'
@@ -64,6 +73,7 @@ func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Jo
 
 	worker := func(jobs <-chan *job, results chan<- *domain.Journey, errorChan chan<- string) {
 		p.logger.Debug("Worker started")
+		// This is a loop that handles the line of CSV data.
 		for {
 			select {
 				case job, ok := <-jobs:
@@ -105,6 +115,7 @@ func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Jo
 
 	lineNumber := 0
 	go func() {
+		// Read the next line from the CSV file and send a job to the jobs channel.
 		for {
 			lineNumber ++
 			line, err := csvReader.Read()

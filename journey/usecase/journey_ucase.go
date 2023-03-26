@@ -1,4 +1,4 @@
-// Define all app usecases
+// package usecase implements all the application usecases
 package usecase
 
 import (
@@ -18,7 +18,12 @@ type journeyUsecase struct {
 
 }
 
-// Constructor
+// NewJourneyUsecase creates a new journey usecase.
+// 
+// @param logger - Logger to log to. Must not be nil.
+// @param cfg - Configuration for the journey repository. Must not be nil.
+// @param jRepo - Journey repository to use. Must not be nil.
+// @param jCsvParser - Journey parser to use. Must not be nil
 func NewJourneyUsecase(logger *zap.SugaredLogger, cfg *configuration.Config, jRepo domain.JourneyRepositoryInterface, jCsvParser domain.JourneyParser) domain.JourneyUsecase {
 	return &journeyUsecase{
 		logger: logger,
@@ -28,6 +33,9 @@ func NewJourneyUsecase(logger *zap.SugaredLogger, cfg *configuration.Config, jRe
 	}
 }
 
+// ImportFromCSVFile imports journeys from a CSV file.
+// 
+// @param reader - the reader to read the csv file
 func (ucase *journeyUsecase) ImportFromCSVFile(reader io.Reader) (int64, []string) {
 	journeyChan := make(chan *domain.Journey)
 	errorChan := make(chan string)

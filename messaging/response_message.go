@@ -1,4 +1,4 @@
-// define message send in http response
+// package messaging defines messages sended in http response
 package messaging
 
 // Default response message
