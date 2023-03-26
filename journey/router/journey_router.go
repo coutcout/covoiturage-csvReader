@@ -1,8 +1,9 @@
-// Routers defines all the API path
+// Package router defines all the API path
 package router
 
 import (
 	"fmt"
+	"me/coutcout/covoiturage/configuration"
 	"me/coutcout/covoiturage/domain"
 	"me/coutcout/covoiturage/messaging"
 	"mime/multipart"
@@ -19,21 +20,31 @@ type form struct {
 type journeyRoute struct {
 	logger         *zap.SugaredLogger
 	journeyUsecase domain.JourneyUsecase
+	cfg            *configuration.Config
 }
 
-// Constructor
-func NewJourneyRouter(logger *zap.SugaredLogger, mainRouter *gin.Engine, jUsecase domain.JourneyUsecase) {
+// NewJourneyRouter creates a new router for journeys.
+//
+// @param logger - The logger to log to.
+// @param cfg - The configuration of the application. Can be nil.
+// @param mainRouter - The Gin Engine to add routes to.
+// @param jUsecase - The domain.JourneyUsecase to use
+func NewJourneyRouter(logger *zap.SugaredLogger, cfg *configuration.Config, mainRouter *gin.Engine, jUsecase domain.JourneyUsecase) {
 	router := &journeyRoute{
 		logger:         logger,
+		cfg:            cfg,
 		journeyUsecase: jUsecase,
 	}
-
 	logger.Debug("Creation of journey routes")
 	mainRouter.POST("/import", func(c *gin.Context) {
 		router.importJourney(c)
 	})
 }
 
+// importJourney imports files from a file upload
+//
+// @param j - route to respond to requests to import journeys
+// @param c - gin. Context for request body to be passed
 func (j *journeyRoute) importJourney(c *gin.Context) {
 	var form form
 	err := c.ShouldBind(&form)
@@ -48,7 +59,7 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 		return
 	}
 
-	const MAX_UPLOAD_FILE = 1024 * 1024
+	maxUploadFileSize := j.cfg.Journey.Import.MaxUploadFile * 1024
 	response := messaging.MultipleResponseMessage{
 		Files: []messaging.FileImportResponseMessage{},
 		Data: messaging.FileImportData{
@@ -64,10 +75,10 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 			Errors:   []string{},
 		}
 
-		if formFile.Size > MAX_UPLOAD_FILE {
-			err := fmt.Errorf("file %s is too big", formFile.Filename)
+		if formFile.Size > maxUploadFileSize {
+			err := fmt.Errorf("file %s is too big (current: %d - max: %d)", formFile.Filename, formFile.Size, maxUploadFileSize)
 			c.Error(err)
-			response.Data.NbFilesWithErrors ++
+			response.Data.NbFilesWithErrors++
 			fileResponse.Imported = false
 			fileResponse.Errors = append(fileResponse.Errors, err.Error())
 			response.Files = append(response.Files, fileResponse)
@@ -82,7 +93,7 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 				"filesize", formFile.Size,
 			)
 			c.Error(err)
-			response.Data.NbFilesWithErrors ++
+			response.Data.NbFilesWithErrors++
 			fileResponse.Imported = false
 			fileResponse.Errors = append(fileResponse.Errors, err.Error())
 			break
@@ -93,19 +104,19 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 		fileResponse.Errors = append(fileResponse.Errors, errors...)
 		fileResponse.NbLineImported = int(nbLineImported)
 		if len(errors) > 0 {
-			response.Data.NbFilesWithErrors ++
-			if(nbLineImported == 0){
+			response.Data.NbFilesWithErrors++
+			if nbLineImported == 0 {
 				fileResponse.Imported = false
 			}
 		} else {
 
-			response.Data.NbFilesSucceded ++
+			response.Data.NbFilesSucceded++
 		}
-		response.Files = append(response.Files, fileResponse)	
+		response.Files = append(response.Files, fileResponse)
 	}
 
 	responseStatus := http.StatusAccepted
-	if response.Data.NbLineImported == 0 {
+	if response.Data.NbFilesWithErrors > 0 && response.Data.NbLineImported == 0 {
 		responseStatus = http.StatusBadRequest
 	}
 

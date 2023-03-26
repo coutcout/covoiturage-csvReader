@@ -1,0 +1,8 @@
+server:
+  host: 127.0.0.1
+  port: 8080
+journey=
+  import:
+    max-upload-file-size: 1000000
+  parser:
+    worker-pool-size: 10

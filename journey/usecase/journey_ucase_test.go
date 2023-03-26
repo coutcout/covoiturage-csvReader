@@ -1,8 +1,9 @@
-// Test usecases
+// Package usecase_test tests all the application usecases
 package usecase_test
 
 import (
 	"log"
+	"me/coutcout/covoiturage/configuration"
 	"me/coutcout/covoiturage/journey/service"
 	"me/coutcout/covoiturage/journey/usecase"
 	"me/coutcout/covoiturage/mocks"
@@ -16,6 +17,7 @@ import (
 )
 
 var logger zap.SugaredLogger
+var config *configuration.Config
 
 func init() {
 	newLogger, err := zap.NewDevelopment()
@@ -24,14 +26,19 @@ func init() {
 	}
 
 	logger = *newLogger.Sugar()
+
+	config, err = configuration.NewConfig("../../resource/configurations/application-tu.yaml")
+	if err != nil {
+		logger.Error(err)
+	}
 }
 
 func TestImportFromCSVFile(t *testing.T) {
 	type tmplTest struct {
-		name     string
-		filename string
-		nbAdded  int64
-		shouldHaveErrors 	 bool
+		name             string
+		filename         string
+		nbAdded          int64
+		shouldHaveErrors bool
 	}
 
 	tests := []tmplTest{
@@ -49,12 +56,12 @@ func TestImportFromCSVFile(t *testing.T) {
 
 			jRepo := new(mocks.JourneyRepositoryInterface)
 			jRepo.On("Add", mock.AnythingOfType("*domain.Journey")).Return(true, nil)
-			jCsvParser := service.NewJourneyCsvParser(&logger)
+			jCsvParser := service.NewJourneyCsvParser(&logger, config)
 
 			journeyUsecase := usecase.NewJourneyUsecase(
 				&logger,
+				config,
 				jRepo,
-			
 				jCsvParser,
 			)
 			nbJourneyImported, err := journeyUsecase.ImportFromCSVFile(f)
