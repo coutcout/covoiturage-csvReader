@@ -1,4 +1,4 @@
-// package router defines all the API path
+// Package router defines all the API path
 package router
 
 import (
@@ -20,12 +20,11 @@ type form struct {
 type journeyRoute struct {
 	logger         *zap.SugaredLogger
 	journeyUsecase domain.JourneyUsecase
-	cfg *configuration.Config
+	cfg            *configuration.Config
 }
 
-
 // NewJourneyRouter creates a new router for journeys.
-// 
+//
 // @param logger - The logger to log to.
 // @param cfg - The configuration of the application. Can be nil.
 // @param mainRouter - The Gin Engine to add routes to.
@@ -33,17 +32,17 @@ type journeyRoute struct {
 func NewJourneyRouter(logger *zap.SugaredLogger, cfg *configuration.Config, mainRouter *gin.Engine, jUsecase domain.JourneyUsecase) {
 	router := &journeyRoute{
 		logger:         logger,
-		cfg: cfg,
+		cfg:            cfg,
 		journeyUsecase: jUsecase,
 	}
-logger.Debug("Creation of journey routes")
-mainRouter.POST("/import", func(c *gin.Context) {
+	logger.Debug("Creation of journey routes")
+	mainRouter.POST("/import", func(c *gin.Context) {
 		router.importJourney(c)
 	})
 }
 
 // importJourney imports files from a file upload
-// 
+//
 // @param j - route to respond to requests to import journeys
 // @param c - gin. Context for request body to be passed
 func (j *journeyRoute) importJourney(c *gin.Context) {
@@ -79,7 +78,7 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 		if formFile.Size > maxUploadFileSize {
 			err := fmt.Errorf("file %s is too big (current: %d - max: %d)", formFile.Filename, formFile.Size, maxUploadFileSize)
 			c.Error(err)
-			response.Data.NbFilesWithErrors ++
+			response.Data.NbFilesWithErrors++
 			fileResponse.Imported = false
 			fileResponse.Errors = append(fileResponse.Errors, err.Error())
 			response.Files = append(response.Files, fileResponse)
@@ -94,7 +93,7 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 				"filesize", formFile.Size,
 			)
 			c.Error(err)
-			response.Data.NbFilesWithErrors ++
+			response.Data.NbFilesWithErrors++
 			fileResponse.Imported = false
 			fileResponse.Errors = append(fileResponse.Errors, err.Error())
 			break
@@ -105,15 +104,15 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 		fileResponse.Errors = append(fileResponse.Errors, errors...)
 		fileResponse.NbLineImported = int(nbLineImported)
 		if len(errors) > 0 {
-			response.Data.NbFilesWithErrors ++
-			if(nbLineImported == 0){
+			response.Data.NbFilesWithErrors++
+			if nbLineImported == 0 {
 				fileResponse.Imported = false
 			}
 		} else {
 
-			response.Data.NbFilesSucceded ++
+			response.Data.NbFilesSucceded++
 		}
-		response.Files = append(response.Files, fileResponse)	
+		response.Files = append(response.Files, fileResponse)
 	}
 
 	responseStatus := http.StatusAccepted

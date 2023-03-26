@@ -1,4 +1,4 @@
-// package router_test tests all the routing configuration
+// Package router_test tests all the routing configuration
 package router_test
 
 import (
@@ -41,16 +41,16 @@ func init() {
 	}
 }
 
-func TestImportCSVFile(t *testing.T){
+func TestImportCSVFile(t *testing.T) {
 	r := gin.Default()
 	mockJUsecase := new(mocks.JourneyUsecase)
 	router.NewJourneyRouter(&logger, config, r, mockJUsecase)
 
 	type tmplTest struct {
-		name     	string
-		filename 	string
-		statusCode  int
-		hasErrors	bool
+		name                 string
+		filename             string
+		statusCode           int
+		hasErrors            bool
 		expectedImportedLine int
 	}
 
@@ -74,29 +74,29 @@ func TestImportCSVFile(t *testing.T){
 			body := &bytes.Buffer{}
 			writer := multipart.NewWriter(body)
 			f, err := writer.CreateFormFile("files", test.filename)
-			if(err != nil){
+			if err != nil {
 				logger.Error(err)
 			}
 
 			file, err := os.Open(filepath.Join("testdata", test.filename))
-			if(err != nil){
+			if err != nil {
 				logger.Error(err)
 			}
 
 			_, err2 := io.Copy(f, file)
-			if(err != nil){
+			if err != nil {
 				logger.Error(err2)
 			}
 
 			writer.Close()
-			
+
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest("POST", "/import", body)
 			req.Header.Set("Content-Type", writer.FormDataContentType())
 			r.ServeHTTP(w, req)
 
 			assert.Equal(t, test.statusCode, w.Code)
-			response := messaging.MultipleResponseMessage{} 
+			response := messaging.MultipleResponseMessage{}
 			json.NewDecoder(w.Body).Decode(&response)
 
 			assert.NotEmpty(t, response.Files)
@@ -114,38 +114,38 @@ func TestImportCSVFile(t *testing.T){
 	}
 }
 
-func TestImportCSVFile_wrongParameter(t *testing.T){
+func TestImportCSVFile_wrongParameter(t *testing.T) {
 	r := gin.Default()
 	mockJUsecase := new(mocks.JourneyUsecase)
 	router.NewJourneyRouter(&logger, config, r, mockJUsecase)
-	
+
 	t.Run("Wrong parameter name", func(t *testing.T) {
 		body := &bytes.Buffer{}
 		writer := multipart.NewWriter(body)
 		f, err := writer.CreateFormFile("wrongFile", "dataset_1.csv")
-		if(err != nil){
+		if err != nil {
 			logger.Error(err)
 		}
 
 		file, err := os.Open(filepath.Join("testdata", "dataset_1.csv"))
-		if(err != nil){
+		if err != nil {
 			logger.Error(err)
 		}
 
 		_, err2 := io.Copy(f, file)
-		if(err != nil){
+		if err != nil {
 			logger.Error(err2)
 		}
 
 		writer.Close()
-		
+
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("POST", "/import", body)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
 		r.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
-		response := messaging.SingleResponseMessage{} 
+		response := messaging.SingleResponseMessage{}
 		json.NewDecoder(w.Body).Decode(&response)
 
 		assert.NotEmpty(t, response.Errors)

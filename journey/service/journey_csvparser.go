@@ -1,4 +1,4 @@
-// package service define services which are usefull for the application
+// Package service define services which are usefull for the application
 package service
 
 import (
@@ -19,11 +19,11 @@ import (
 
 type journeyCsvParser struct {
 	logger *zap.SugaredLogger
-	cfg *configuration.Config
+	cfg    *configuration.Config
 }
 
 // NewJourneyCsvParser returns a parser for CSV files.
-// 
+//
 // @param logger - the logger to use for logging errors. Must not be nil.
 // @param cfg - the configuration. Config to use for parsing the file
 func NewJourneyCsvParser(logger *zap.SugaredLogger, cfg *configuration.Config) domain.JourneyParser {
@@ -34,12 +34,12 @@ func NewJourneyCsvParser(logger *zap.SugaredLogger, cfg *configuration.Config) d
 }
 
 type job struct {
-	line []string
+	line       []string
 	lineNumber int
 }
 
 // Parse a journey CSV file and send the results to the given channel
-// 
+//
 // @param p - The parser to use for parsing
 // @param reader - CSV File reader
 // @param journeyChan - Channel which will be used to send imported journeys
@@ -50,7 +50,7 @@ func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Jo
 
 	p.logger.Debug("Reading headers")
 	if _, err := csvReader.Read(); err != nil {
-		
+
 		close(journeyChan)
 		if err.Error() == "EOF" {
 			p.logger.Info("End of the file")
@@ -76,30 +76,30 @@ func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Jo
 		// This is a loop that handles the line of CSV data.
 		for {
 			select {
-				case job, ok := <-jobs:
-					if !ok {
-						p.logger.Debug("Worker ended")
-						return
-					}
-					p.logger.Debugw("Line received",
-						"csvLine", job,
-					)
+			case job, ok := <-jobs:
+				if !ok {
+					p.logger.Debug("Worker ended")
+					return
+				}
+				p.logger.Debugw("Line received",
+					"csvLine", job,
+				)
 
-					var res *domain.Journey
-					var err error
-					if len(job.line) == 27{
-						res, err = p.parseJourney27Fields(job.line, job.lineNumber);
-					} else if len(job.line) == 29 {
-						res, err = p.parseJourney29Fields(job.line, job.lineNumber);
-					} else {
-						err = fmt.Errorf("the number of fields (%d) is uncompatible with all the known CSV parsers", len(job.line))
-					}
+				var res *domain.Journey
+				var err error
+				if len(job.line) == 27 {
+					res, err = p.parseJourney27Fields(job.line, job.lineNumber)
+				} else if len(job.line) == 29 {
+					res, err = p.parseJourney29Fields(job.line, job.lineNumber)
+				} else {
+					err = fmt.Errorf("the number of fields (%d) is uncompatible with all the known CSV parsers", len(job.line))
+				}
 
-					if  err != nil{
-						errorChan <- err.Error()
-					} else {
-						results <- res
-					}
+				if err != nil {
+					errorChan <- err.Error()
+				} else {
+					results <- res
+				}
 			}
 		}
 	}
@@ -117,7 +117,7 @@ func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Jo
 	go func() {
 		// Read the next line from the CSV file and send a job to the jobs channel.
 		for {
-			lineNumber ++
+			lineNumber++
 			line, err := csvReader.Read()
 			if err == io.EOF {
 				p.logger.Debug("End of file reached")
@@ -130,7 +130,7 @@ func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Jo
 				break
 			}
 			jobs <- &job{
-				line: line,
+				line:       line,
 				lineNumber: lineNumber,
 			}
 		}
@@ -147,8 +147,8 @@ func (p *journeyCsvParser) Parse(reader io.Reader, journeyChan chan<- *domain.Jo
 }
 
 func (p *journeyCsvParser) parseJourney27Fields(r []string, lineNumber int) (journey *domain.Journey, err error) {
-	defer func(){
-		if panicErr := recover(); panicErr != nil{
+	defer func() {
+		if panicErr := recover(); panicErr != nil {
 			err = fmt.Errorf("problem while parsing a journey: line %d in wrong format", lineNumber)
 			p.logger.Errorw(err.Error(),
 				"line", strings.Join(r, ","),
@@ -211,8 +211,8 @@ func (p *journeyCsvParser) parseJourney27Fields(r []string, lineNumber int) (jou
 }
 
 func (p *journeyCsvParser) parseJourney29Fields(r []string, lineNumber int) (journey *domain.Journey, err error) {
-	defer func(){
-		if panicErr := recover(); panicErr != nil{
+	defer func() {
+		if panicErr := recover(); panicErr != nil {
 			err = fmt.Errorf("problem while parsing a journey: line %d in wrong format", lineNumber)
 			p.logger.Errorw(err.Error(),
 				"line", strings.Join(r, ","),

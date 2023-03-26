@@ -1,4 +1,4 @@
-// package usecase_test tests all the application usecases
+// Package usecase_test tests all the application usecases
 package usecase_test
 
 import (
@@ -35,10 +35,10 @@ func init() {
 
 func TestImportFromCSVFile(t *testing.T) {
 	type tmplTest struct {
-		name     string
-		filename string
-		nbAdded  int64
-		shouldHaveErrors 	 bool
+		name             string
+		filename         string
+		nbAdded          int64
+		shouldHaveErrors bool
 	}
 
 	tests := []tmplTest{

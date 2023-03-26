@@ -1,3 +1,4 @@
+// Package main contains the main file
 package main
 
 import (
