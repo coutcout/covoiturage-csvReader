@@ -2,9 +2,10 @@
 package configuration_test
 
 import (
-	"me/coutcout/covoiturage/configuration"
 	"strings"
 	"testing"
+
+	"github.com/coutcout/covoiturage-csvReader/configuration"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -12,8 +13,8 @@ import (
 func TestParseParameter(t *testing.T) {
 
 	var tests = []struct {
-		args []string
-		expectedParams *configuration.Parameters
+		args            []string
+		expectedParams  *configuration.Parameters
 		shouldHaveError bool
 	}{
 		{
@@ -22,7 +23,7 @@ func TestParseParameter(t *testing.T) {
 			false,
 		},
 		{
-			[]string{"-config", },
+			[]string{"-config"},
 			nil,
 			true,
 		},
@@ -41,8 +42,8 @@ func TestParseParameter(t *testing.T) {
 	for _, test := range tests {
 		t.Run(strings.Join(test.args, " "), func(t *testing.T) {
 			params, _, err := configuration.ParseFlag("test", test.args)
-		
-			if test.shouldHaveError{
+
+			if test.shouldHaveError {
 				assert.Error(t, err)
 				assert.Nil(t, params)
 			} else {
@@ -51,7 +52,5 @@ func TestParseParameter(t *testing.T) {
 			}
 		})
 	}
-	
-
 
 }

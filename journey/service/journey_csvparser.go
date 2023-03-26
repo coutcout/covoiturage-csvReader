@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"me/coutcout/covoiturage/configuration"
-	"me/coutcout/covoiturage/domain"
+	"github.com/coutcout/covoiturage-csvReader/configuration"
+	"github.com/coutcout/covoiturage-csvReader/domain"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"

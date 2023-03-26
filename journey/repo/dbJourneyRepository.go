@@ -2,8 +2,8 @@
 package repo
 
 import (
-	"me/coutcout/covoiturage/domain"
-	"me/coutcout/covoiturage/configuration"
+	"github.com/coutcout/covoiturage-csvReader/domain"
+	"github.com/coutcout/covoiturage-csvReader/configuration"
 
 	"go.uber.org/zap"
 )

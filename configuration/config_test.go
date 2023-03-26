@@ -3,9 +3,10 @@ package configuration_test
 
 import (
 	"fmt"
-	"me/coutcout/covoiturage/configuration"
 	"reflect"
 	"testing"
+
+	"github.com/coutcout/covoiturage-csvReader/configuration"
 
 	"github.com/stretchr/testify/assert"
 )
