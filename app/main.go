@@ -3,12 +3,13 @@ package main
 
 import (
 	"log"
-	"me/coutcout/covoiturage/configuration"
-	"me/coutcout/covoiturage/journey/repo"
-	"me/coutcout/covoiturage/journey/router"
-	"me/coutcout/covoiturage/journey/service"
-	"me/coutcout/covoiturage/journey/usecase"
 	"os"
+
+	"github.com/coutcout/covoiturage-csvReader/configuration"
+	"github.com/coutcout/covoiturage-csvReader/journey/repo"
+	"github.com/coutcout/covoiturage-csvReader/journey/router"
+	"github.com/coutcout/covoiturage-csvReader/journey/service"
+	"github.com/coutcout/covoiturage-csvReader/journey/usecase"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"

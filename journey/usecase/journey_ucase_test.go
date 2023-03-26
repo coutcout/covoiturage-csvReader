@@ -3,13 +3,14 @@ package usecase_test
 
 import (
 	"log"
-	"me/coutcout/covoiturage/configuration"
-	"me/coutcout/covoiturage/journey/service"
-	"me/coutcout/covoiturage/journey/usecase"
-	"me/coutcout/covoiturage/mocks"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/coutcout/covoiturage-csvReader/configuration"
+	"github.com/coutcout/covoiturage-csvReader/journey/service"
+	"github.com/coutcout/covoiturage-csvReader/journey/usecase"
+	"github.com/coutcout/covoiturage-csvReader/mocks"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

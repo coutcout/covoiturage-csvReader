@@ -18,10 +18,10 @@ import (
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
 
-	"me/coutcout/covoiturage/configuration"
-	"me/coutcout/covoiturage/journey/router"
-	"me/coutcout/covoiturage/messaging"
-	"me/coutcout/covoiturage/mocks"
+	"github.com/coutcout/covoiturage-csvReader/configuration"
+	"github.com/coutcout/covoiturage-csvReader/journey/router"
+	"github.com/coutcout/covoiturage-csvReader/messaging"
+	"github.com/coutcout/covoiturage-csvReader/mocks"
 )
 
 var logger zap.SugaredLogger

@@ -3,9 +3,10 @@ package usecase
 
 import (
 	"io"
-	"me/coutcout/covoiturage/configuration"
-	"me/coutcout/covoiturage/domain"
 	"sync"
+
+	"github.com/coutcout/covoiturage-csvReader/configuration"
+	"github.com/coutcout/covoiturage-csvReader/domain"
 
 	"go.uber.org/zap"
 )

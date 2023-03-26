@@ -1,4 +1,4 @@
-module me/coutcout/covoiturage
+module github.com/coutcout/covoiturage-csvReader
 
 go 1.20
 
