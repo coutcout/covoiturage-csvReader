@@ -5,11 +5,11 @@ import (
 	"log"
 	"os"
 
-	"github.com/coutcout/covoiturage-csvReader/configuration"
-	"github.com/coutcout/covoiturage-csvReader/journey/repo"
-	"github.com/coutcout/covoiturage-csvReader/journey/router"
-	"github.com/coutcout/covoiturage-csvReader/journey/service"
-	"github.com/coutcout/covoiturage-csvReader/journey/usecase"
+	"github.com/coutcout/covoiturage-csvreader/configuration"
+	"github.com/coutcout/covoiturage-csvreader/journey/repo"
+	"github.com/coutcout/covoiturage-csvreader/journey/router"
+	"github.com/coutcout/covoiturage-csvreader/journey/service"
+	"github.com/coutcout/covoiturage-csvreader/journey/usecase"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"

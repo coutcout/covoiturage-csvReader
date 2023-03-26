@@ -5,8 +5,8 @@ import (
 	"io"
 	"sync"
 
-	"github.com/coutcout/covoiturage-csvReader/configuration"
-	"github.com/coutcout/covoiturage-csvReader/domain"
+	"github.com/coutcout/covoiturage-csvreader/configuration"
+	"github.com/coutcout/covoiturage-csvreader/domain"
 
 	"go.uber.org/zap"
 )
