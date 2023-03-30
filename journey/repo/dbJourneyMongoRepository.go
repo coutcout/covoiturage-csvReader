@@ -36,8 +36,15 @@ func NewDbJourneyMongoRepository(logger *zap.SugaredLogger, cfg *configuration.C
 // 
 // @param r - jouey the journey to be
 // @param journey
-func (r *dbJourneyRepository) Add(c *gin.Context, journey *domain.Journey) (bool, error) {
-
-	result, err := r.journeyCollection.InsertOne(c, *journey)
-	return result.InsertedID != nil, err
+func (r *dbJourneyRepository) Add(c *gin.Context, journeys []domain.Journey) (int, error) {
+	if journeys == nil && len(journeys) ==0{
+		return 0, nil
+	}
+	
+	var interfaces []interface{}
+	for _, j := range journeys{
+		interfaces = append(interfaces, j)
+	}
+	result, err := r.journeyCollection.InsertMany(c, interfaces)
+	return len(result.InsertedIDs), err
 }

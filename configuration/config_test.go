@@ -22,6 +22,9 @@ func TestLoadingConfiguration(t *testing.T) {
 
 		assert.Equal(t, "127.0.0.1", config.Server.Host)
 		assert.Equal(t, "8080", config.Server.Port)
+
+		assert.Equal(t, 100, config.Journey.Insertion.WorkerPoolSize)
+		assert.Equal(t, 10, config.Journey.Insertion.BulkInsertSize)
 		assert.Equal(t, int64(1000000), config.Journey.Import.MaxUploadFile)
 		assert.Equal(t, 10, config.Journey.Parser.WorkerPoolSize)
 

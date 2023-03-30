@@ -43,7 +43,7 @@ type Journey struct {
 
 // Repository to manage journey entities
 type JourneyRepositoryInterface interface {
-	Add(c *gin.Context, journey *Journey) (bool, error)
+	Add(c *gin.Context, journeys []Journey) (int, error)
 }
 
 // Parser to deserialize a journey

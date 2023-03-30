@@ -46,15 +46,38 @@ func (ucase *journeyUsecase) ImportFromCSVFile(c *gin.Context, reader io.Reader)
 	nbJourneyImported := 0
 	var workerGroup sync.WaitGroup
 
-	workerGroup.Add(1)
-	go func() {
-		defer workerGroup.Done()
-		for j := range journeyChan {
-			if res, err := ucase.journeyRepo.Add(c, j); err == nil && res {
-				nbJourneyImported++
+	worker := func(repo domain.JourneyRepositoryInterface, journeyChan <-chan *domain.Journey, bufferSize int){
+		var journeyBuffer []domain.Journey
+		for {
+			select {
+			case journey, ok := <-journeyChan:
+				if !ok {
+					ucase.logger.Debug("Worker ended, flushing buffer")
+					repo.Add(c, journeyBuffer)
+					return
+				}
+
+				journeyBuffer = append(journeyBuffer, *journey)
+				if len(journeyBuffer) == bufferSize {
+					ucase.logger.Debugw("Buffer is full, flushing it",
+						"bufferSize", bufferSize,
+					)
+					repo.Add(c, journeyBuffer)
+					journeyBuffer = nil
+				}
 			}
 		}
-	}()
+	}
+
+	ucase.logger.Debug("Workers Initializing")
+	for w := 0; w < ucase.cfg.Journey.Insertion.WorkerPoolSize; w++ {
+		workerGroup.Add(1)
+		go func() {
+			defer workerGroup.Done()
+			worker(ucase.journeyRepo, journeyChan, ucase.cfg.Journey.Insertion.BulkInsertSize)
+		}()
+	}
+
 
 	workerGroup.Add(1)
 	go func() {
