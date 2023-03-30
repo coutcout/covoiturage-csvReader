@@ -2,8 +2,12 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/coutcout/covoiturage-csvreader/configuration"
 	"github.com/coutcout/covoiturage-csvreader/journey/repo"
@@ -33,9 +37,19 @@ func main() {
 	r := gin.Default()
 
 	// Repositories
-	journeyRepo := repo.NewDbJourneyRepository(
+	// ** DB Connections **
+	configMongo := cfg.Database.Mongo
+	dbOpts := options.Client().ApplyURI("mongodb://" + configMongo.Username + ":" + configMongo.Password + "@" + configMongo.Hostname + ":" + configMongo.Port + "/" + configMongo.Options)
+	mongoClient, err := mongo.Connect(context.TODO(), dbOpts)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	mongoDB := mongoClient.Database(configMongo.DbName)
+	journeyRepo := repo.NewDbJourneyMongoRepository(
 		&logger,
 		cfg,
+		mongoDB,
 	)
 
 	// Services

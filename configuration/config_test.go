@@ -24,6 +24,13 @@ func TestLoadingConfiguration(t *testing.T) {
 		assert.Equal(t, "8080", config.Server.Port)
 		assert.Equal(t, int64(1000000), config.Journey.Import.MaxUploadFile)
 		assert.Equal(t, 10, config.Journey.Parser.WorkerPoolSize)
+
+		assert.Equal(t, "user", config.Database.Mongo.Username)
+		assert.Equal(t, "pwd", config.Database.Mongo.Password)
+		assert.Equal(t, "127.0.0.1", config.Database.Mongo.Hostname)
+		assert.Equal(t, "27017", config.Database.Mongo.Port)
+		assert.Equal(t, "csvLoader", config.Database.Mongo.DbName)
+		assert.Equal(t, "test", config.Database.Mongo.Options)
 	})
 
 	t.Run("File does not exist", func(t *testing.T) {

@@ -23,6 +23,17 @@ type Config struct {
 			WorkerPoolSize int `yaml:"worker-pool-size"`
 		}
 	}
+
+	Database struct {
+		Mongo struct {
+			Username string `yaml:"username"`
+			Password string `yaml:"password"`
+			Hostname string `yaml:"hostname"`
+			Port string `yaml:"port"`
+			DbName string `yaml:"name"`
+			Options string `yaml:"options"`
+		}
+	}
 }
 
 

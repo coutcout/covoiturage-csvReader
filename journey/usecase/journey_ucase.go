@@ -7,6 +7,7 @@ import (
 
 	"github.com/coutcout/covoiturage-csvreader/configuration"
 	"github.com/coutcout/covoiturage-csvreader/domain"
+	"github.com/gin-gonic/gin"
 
 	"go.uber.org/zap"
 )
@@ -36,7 +37,7 @@ func NewJourneyUsecase(logger *zap.SugaredLogger, cfg *configuration.Config, jRe
 // ImportFromCSVFile imports journeys from a CSV file.
 //
 // @param reader - the reader to read the csv file
-func (ucase *journeyUsecase) ImportFromCSVFile(reader io.Reader) (int64, []string) {
+func (ucase *journeyUsecase) ImportFromCSVFile(c *gin.Context, reader io.Reader) (int64, []string) {
 	journeyChan := make(chan *domain.Journey)
 	errorChan := make(chan string)
 	ucase.journeyCsvParser.Parse(reader, journeyChan, errorChan)
@@ -49,7 +50,7 @@ func (ucase *journeyUsecase) ImportFromCSVFile(reader io.Reader) (int64, []strin
 	go func() {
 		defer workerGroup.Done()
 		for j := range journeyChan {
-			if res, err := ucase.journeyRepo.Add(j); err == nil && res {
+			if res, err := ucase.journeyRepo.Add(c, j); err == nil && res {
 				nbJourneyImported++
 			}
 		}
