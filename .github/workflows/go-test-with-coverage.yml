@@ -42,7 +42,7 @@ jobs:
 
         # Ignore code-generated files when calculating coverage totals
         ignore-pattern: |
-          ^me\/coutcout\/covoiturage\/mocks
+          ^github.com\/coutcout\/covoiturage-csvreader\/mocks
 
     - name: Build
       run: go build -v ./...
