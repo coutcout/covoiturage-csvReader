@@ -2,7 +2,18 @@ server:
   host: 127.0.0.1
   port: 8080
 journey:
+  insertion:
+    worker-pool-size: 100
+    bulk-insert-size: 10
   import:
     max-upload-file-size: 1000000
   parser:
     worker-pool-size: 10
+database:
+  mongo:
+    username: "user"
+    password: "pwd"
+    hostname: "127.0.0.1"
+    port: "27017"
+    name: "csvLoader"
+    options: "test"

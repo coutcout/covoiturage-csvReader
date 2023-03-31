@@ -5,6 +5,8 @@ package mocks
 import (
 	io "io"
 
+	gin "github.com/gin-gonic/gin"
+
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -13,23 +15,23 @@ type JourneyUsecase struct {
 	mock.Mock
 }
 
-// ImportFromCSVFile provides a mock function with given fields: reader
-func (_m *JourneyUsecase) ImportFromCSVFile(reader io.Reader) (int64, []string) {
-	ret := _m.Called(reader)
+// ImportFromCSVFile provides a mock function with given fields: c, reader
+func (_m *JourneyUsecase) ImportFromCSVFile(c *gin.Context, reader io.Reader) (int64, []string) {
+	ret := _m.Called(c, reader)
 
 	var r0 int64
 	var r1 []string
-	if rf, ok := ret.Get(0).(func(io.Reader) (int64, []string)); ok {
-		return rf(reader)
+	if rf, ok := ret.Get(0).(func(*gin.Context, io.Reader) (int64, []string)); ok {
+		return rf(c, reader)
 	}
-	if rf, ok := ret.Get(0).(func(io.Reader) int64); ok {
-		r0 = rf(reader)
+	if rf, ok := ret.Get(0).(func(*gin.Context, io.Reader) int64); ok {
+		r0 = rf(c, reader)
 	} else {
 		r0 = ret.Get(0).(int64)
 	}
 
-	if rf, ok := ret.Get(1).(func(io.Reader) []string); ok {
-		r1 = rf(reader)
+	if rf, ok := ret.Get(1).(func(*gin.Context, io.Reader) []string); ok {
+		r1 = rf(c, reader)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).([]string)

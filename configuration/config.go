@@ -22,14 +22,29 @@ type Config struct {
 		Parser struct {
 			WorkerPoolSize int `yaml:"worker-pool-size"`
 		}
+
+		Insertion struct {
+			WorkerPoolSize int `yaml:"worker-pool-size"`
+			BulkInsertSize int `yaml:"bulk-insert-size"`
+		}
+	}
+
+	Database struct {
+		Mongo struct {
+			Username string `yaml:"username"`
+			Password string `yaml:"password"`
+			Hostname string `yaml:"hostname"`
+			Port     string `yaml:"port"`
+			DbName   string `yaml:"name"`
+			Options  string `yaml:"options"`
+		}
 	}
 }
 
-
 // NewConfig creates a new Config from a file. The file must be a YAML config file
-// 
+//
 // @param configPath - Path to the configuration file
-func NewConfig(configPath string)(*Config, error){
+func NewConfig(configPath string) (*Config, error) {
 	config := &Config{}
 
 	file, err := os.Open(configPath)
@@ -39,7 +54,7 @@ func NewConfig(configPath string)(*Config, error){
 	defer file.Close()
 
 	d := yaml.NewDecoder(file)
-	
+
 	if err := d.Decode(&config); err != nil {
 		return nil, err
 	}

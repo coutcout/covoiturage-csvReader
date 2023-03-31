@@ -100,7 +100,7 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 			break
 		}
 
-		nbLineImported, errors := j.journeyUsecase.ImportFromCSVFile(openedFile)
+		nbLineImported, errors := j.journeyUsecase.ImportFromCSVFile(c, openedFile)
 		response.Data.NbLineImported += int(nbLineImported)
 		fileResponse.Errors = append(fileResponse.Errors, errors...)
 		fileResponse.NbLineImported = int(nbLineImported)

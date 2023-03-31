@@ -2,6 +2,9 @@ server:
   host: 127.0.0.1
   port: 8080
 journey:
+  insertion:
+    worker-pool-size: 20
+    bulk-insert-size: 1000
   import:
     max-upload-file-size: 100
   parser:

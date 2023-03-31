@@ -5,6 +5,7 @@ import (
 	"io"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
@@ -42,7 +43,7 @@ type Journey struct {
 
 // Repository to manage journey entities
 type JourneyRepositoryInterface interface {
-	Add(journey *Journey) (bool, error)
+	Add(c *gin.Context, journeys []Journey) (int, error)
 }
 
 // Parser to deserialize a journey
@@ -52,5 +53,5 @@ type JourneyParser interface {
 
 // Usecases for a journey
 type JourneyUsecase interface {
-	ImportFromCSVFile(reader io.Reader) (int64, []string)
+	ImportFromCSVFile(c *gin.Context, reader io.Reader) (int64, []string)
 }

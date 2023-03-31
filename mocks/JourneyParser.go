@@ -4,6 +4,7 @@ package mocks
 
 import (
 	io "io"
+
 	domain "github.com/coutcout/covoiturage-csvreader/domain"
 
 	mock "github.com/stretchr/testify/mock"
