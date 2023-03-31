@@ -4,6 +4,7 @@ package mocks
 
 import (
 	domain "github.com/coutcout/covoiturage-csvreader/domain"
+	gin "github.com/gin-gonic/gin"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -13,23 +14,23 @@ type JourneyRepositoryInterface struct {
 	mock.Mock
 }
 
-// Add provides a mock function with given fields: journey
-func (_m *JourneyRepositoryInterface) Add(journey *domain.Journey) (bool, error) {
-	ret := _m.Called(journey)
+// Add provides a mock function with given fields: c, journeys
+func (_m *JourneyRepositoryInterface) Add(c *gin.Context, journeys []domain.Journey) (int, error) {
+	ret := _m.Called(c, journeys)
 
-	var r0 bool
+	var r0 int
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*domain.Journey) (bool, error)); ok {
-		return rf(journey)
+	if rf, ok := ret.Get(0).(func(*gin.Context, []domain.Journey) (int, error)); ok {
+		return rf(c, journeys)
 	}
-	if rf, ok := ret.Get(0).(func(*domain.Journey) bool); ok {
-		r0 = rf(journey)
+	if rf, ok := ret.Get(0).(func(*gin.Context, []domain.Journey) int); ok {
+		r0 = rf(c, journeys)
 	} else {
-		r0 = ret.Get(0).(bool)
+		r0 = ret.Get(0).(int)
 	}
 
-	if rf, ok := ret.Get(1).(func(*domain.Journey) error); ok {
-		r1 = rf(journey)
+	if rf, ok := ret.Get(1).(func(*gin.Context, []domain.Journey) error); ok {
+		r1 = rf(c, journeys)
 	} else {
 		r1 = ret.Error(1)
 	}

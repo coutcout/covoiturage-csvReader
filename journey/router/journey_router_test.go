@@ -68,7 +68,7 @@ func TestImportCSVFile(t *testing.T) {
 			if test.hasErrors {
 				returnedErrors = []string{"error"}
 			}
-			mock := mockJUsecase.On("ImportFromCSVFile", mock.Anything)
+			mock := mockJUsecase.On("ImportFromCSVFile", mock.Anything, mock.Anything)
 			mock.Return(int64(test.expectedImportedLine), returnedErrors)
 
 			body := &bytes.Buffer{}

@@ -39,14 +39,16 @@ func NewJourneyUsecase(logger *zap.SugaredLogger, cfg *configuration.Config, jRe
 // @param reader - the reader to read the csv file
 func (ucase *journeyUsecase) ImportFromCSVFile(c *gin.Context, reader io.Reader) (int64, []string) {
 	journeyChan := make(chan *domain.Journey)
+	insertedJourneyCounterChan := make(chan int)
 	errorChan := make(chan string)
 	ucase.journeyCsvParser.Parse(reader, journeyChan, errorChan)
 	errors := []string{}
 
 	nbJourneyImported := 0
 	var workerGroup sync.WaitGroup
+	var insertionWorkerGroup sync.WaitGroup
 
-	worker := func(repo domain.JourneyRepositoryInterface, journeyChan <-chan *domain.Journey, bufferSize int){
+	worker := func(repo domain.JourneyRepositoryInterface, journeyChan <-chan *domain.Journey, insertedJourneyCounter chan<- int, bufferSize int){
 		var journeyBuffer []domain.Journey
 		for {
 			select {
@@ -54,6 +56,7 @@ func (ucase *journeyUsecase) ImportFromCSVFile(c *gin.Context, reader io.Reader)
 				if !ok {
 					ucase.logger.Debug("Worker ended, flushing buffer")
 					repo.Add(c, journeyBuffer)
+					insertedJourneyCounter <- len(journeyBuffer)
 					return
 				}
 
@@ -63,6 +66,7 @@ func (ucase *journeyUsecase) ImportFromCSVFile(c *gin.Context, reader io.Reader)
 						"bufferSize", bufferSize,
 					)
 					repo.Add(c, journeyBuffer)
+					insertedJourneyCounter <- len(journeyBuffer)
 					journeyBuffer = nil
 				}
 			}
@@ -71,13 +75,29 @@ func (ucase *journeyUsecase) ImportFromCSVFile(c *gin.Context, reader io.Reader)
 
 	ucase.logger.Debug("Workers Initializing")
 	for w := 0; w < ucase.cfg.Journey.Insertion.WorkerPoolSize; w++ {
-		workerGroup.Add(1)
+		insertionWorkerGroup.Add(1)
 		go func() {
-			defer workerGroup.Done()
-			worker(ucase.journeyRepo, journeyChan, ucase.cfg.Journey.Insertion.BulkInsertSize)
+			defer func(){
+				insertionWorkerGroup.Done()
+			}()
+			worker(ucase.journeyRepo, journeyChan, insertedJourneyCounterChan, ucase.cfg.Journey.Insertion.BulkInsertSize)
 		}()
 	}
 
+	workerGroup.Add(1)
+	go func(){
+		defer workerGroup.Done()
+		insertionWorkerGroup.Wait()
+		close(insertedJourneyCounterChan)
+	}()
+
+	workerGroup.Add(1)
+	go func() {
+		defer workerGroup.Done()
+		for nb := range insertedJourneyCounterChan {
+			nbJourneyImported += nb
+		}
+	}()
 
 	workerGroup.Add(1)
 	go func() {

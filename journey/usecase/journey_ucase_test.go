@@ -11,6 +11,7 @@ import (
 	"github.com/coutcout/covoiturage-csvreader/journey/service"
 	"github.com/coutcout/covoiturage-csvreader/journey/usecase"
 	"github.com/coutcout/covoiturage-csvreader/mocks"
+	"github.com/gin-gonic/gin"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -38,7 +39,7 @@ func TestImportFromCSVFile(t *testing.T) {
 	type tmplTest struct {
 		name             string
 		filename         string
-		nbAdded          int64
+		nbAdded          int
 		shouldHaveErrors bool
 	}
 
@@ -56,7 +57,7 @@ func TestImportFromCSVFile(t *testing.T) {
 			defer f.Close()
 
 			jRepo := new(mocks.JourneyRepositoryInterface)
-			jRepo.On("Add", mock.AnythingOfType("*domain.Journey")).Return(true, nil)
+			jRepo.On("Add", mock.AnythingOfType("*gin.Context"), mock.AnythingOfType("[]domain.Journey")).Return(test.nbAdded, nil)
 			jCsvParser := service.NewJourneyCsvParser(&logger, config)
 
 			journeyUsecase := usecase.NewJourneyUsecase(
@@ -65,14 +66,14 @@ func TestImportFromCSVFile(t *testing.T) {
 				jRepo,
 				jCsvParser,
 			)
-			nbJourneyImported, err := journeyUsecase.ImportFromCSVFile(f)
+			nbJourneyImported, err := journeyUsecase.ImportFromCSVFile(&gin.Context{}, f)
 
 			if test.shouldHaveErrors {
 				assert.NotEmpty(t, err)
 			} else {
 				assert.Empty(t, err)
 			}
-			assert.Equal(t, test.nbAdded, nbJourneyImported)
+			assert.Equal(t, test.nbAdded, int(nbJourneyImported))
 
 			logger.Debugw("End of the test",
 				"file", test.filename,
