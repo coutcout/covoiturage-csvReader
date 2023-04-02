@@ -9,3 +9,6 @@ journey:
     max-upload-file-size: 100
   parser:
     worker-pool-size: 10
+  get:
+    stream:
+      buffer-size: 2

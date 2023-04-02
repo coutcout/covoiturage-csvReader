@@ -28,3 +28,4 @@ type MultipleResponseMessage struct {
 	Files []FileImportResponseMessage
 	Data  FileImportData
 }
+

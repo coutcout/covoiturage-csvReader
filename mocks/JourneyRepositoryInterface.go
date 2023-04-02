@@ -38,6 +38,32 @@ func (_m *JourneyRepositoryInterface) Add(c *gin.Context, journeys []domain.Jour
 	return r0, r1
 }
 
+// FindAll provides a mock function with given fields: c, limit, skip
+func (_m *JourneyRepositoryInterface) FindAll(c *gin.Context, limit int64, skip int64) ([]domain.Journey, error) {
+	ret := _m.Called(c, limit, skip)
+
+	var r0 []domain.Journey
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*gin.Context, int64, int64) ([]domain.Journey, error)); ok {
+		return rf(c, limit, skip)
+	}
+	if rf, ok := ret.Get(0).(func(*gin.Context, int64, int64) []domain.Journey); ok {
+		r0 = rf(c, limit, skip)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]domain.Journey)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*gin.Context, int64, int64) error); ok {
+		r1 = rf(c, limit, skip)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 type mockConstructorTestingTNewJourneyRepositoryInterface interface {
 	mock.TestingT
 	Cleanup(func())

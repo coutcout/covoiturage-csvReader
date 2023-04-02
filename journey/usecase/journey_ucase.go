@@ -111,3 +111,26 @@ func (ucase *journeyUsecase) ImportFromCSVFile(c *gin.Context, reader io.Reader)
 
 	return int64(nbJourneyImported), errors
 }
+
+func (ucase *journeyUsecase) GetJourneys(c *gin.Context, errorChan chan<- error) <-chan []domain.Journey{
+	journeyChan := make(chan []domain.Journey)
+	go func(){
+		defer close(journeyChan)
+		
+		skip := int64(0)
+		var isFinished bool = false
+		for ok:= true; ok; ok = !isFinished {
+			journeys, err := ucase.journeyRepo.FindAll(c, skip, ucase.cfg.Journey.Get.Stream.BufferSize)
+			if err != nil {
+				errorChan <- err
+			}
+
+			if len(journeys) > 0 {
+				journeyChan <- journeys
+			}
+			skip += ucase.cfg.Journey.Get.Stream.BufferSize
+			isFinished = len(journeys) < int(ucase.cfg.Journey.Get.Stream.BufferSize) 
+		}
+	}()
+	return journeyChan
+}

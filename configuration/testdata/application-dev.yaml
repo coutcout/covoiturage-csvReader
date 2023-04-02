@@ -9,6 +9,9 @@ journey:
     max-upload-file-size: 1000000
   parser:
     worker-pool-size: 10
+  get:
+    stream:
+      buffer-size: 1000
 database:
   mongo:
     username: "user"

@@ -2,7 +2,9 @@
 package router
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"mime/multipart"
 	"net/http"
 
@@ -37,8 +39,12 @@ func NewJourneyRouter(logger *zap.SugaredLogger, cfg *configuration.Config, main
 		journeyUsecase: jUsecase,
 	}
 	logger.Debug("Creation of journey routes")
-	mainRouter.POST("/import", func(c *gin.Context) {
+	mainURI := "/journey"
+	mainRouter.POST(mainURI + "/import", func(c *gin.Context) {
 		router.importJourney(c)
+	})
+	mainRouter.GET(mainURI, func(c *gin.Context){
+		router.getJourneys(c)
 	})
 }
 
@@ -122,4 +128,33 @@ func (j *journeyRoute) importJourney(c *gin.Context) {
 	}
 
 	c.JSON(responseStatus, response)
+}
+
+func (r *journeyRoute) getJourneys(c *gin.Context){
+	errorChan := make(chan error)
+	journeyChan := r.journeyUsecase.GetJourneys(c, errorChan);
+	defer close(errorChan)
+	go func(c *gin.Context){
+		err, ok := <- errorChan
+		if !ok {
+			r.logger.Debug("getJourneys ended without error")
+			return
+		}
+
+		r.logger.Errorw("Error while retrieving all journeys with streaming",
+			"error", err,
+		)
+		c.Abort()
+	}(c)
+
+	c.Stream(func(w io.Writer) bool {
+		msg, ok := <- journeyChan
+		if !ok {
+			return false
+		}
+		encoder := json.NewEncoder(c.Writer)
+		encoder.Encode(msg)
+		return true
+	})
+	
 }

@@ -28,6 +28,8 @@ func TestLoadingConfiguration(t *testing.T) {
 		assert.Equal(t, int64(1000000), config.Journey.Import.MaxUploadFile)
 		assert.Equal(t, 10, config.Journey.Parser.WorkerPoolSize)
 
+		assert.Equal(t, int64(1000), config.Journey.Get.Stream.BufferSize)
+
 		assert.Equal(t, "user", config.Database.Mongo.Username)
 		assert.Equal(t, "pwd", config.Database.Mongo.Password)
 		assert.Equal(t, "127.0.0.1", config.Database.Mongo.Hostname)

@@ -27,6 +27,12 @@ type Config struct {
 			WorkerPoolSize int `yaml:"worker-pool-size"`
 			BulkInsertSize int `yaml:"bulk-insert-size"`
 		}
+
+		Get struct {
+			Stream struct {
+				BufferSize int64 `yaml:"buffer-size"`
+			}
+		}
 	}
 
 	Database struct {

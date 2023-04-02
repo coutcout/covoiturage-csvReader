@@ -44,6 +44,7 @@ type Journey struct {
 // Repository to manage journey entities
 type JourneyRepositoryInterface interface {
 	Add(c *gin.Context, journeys []Journey) (int, error)
+	FindAll(c *gin.Context, limit int64, skip int64) ([]Journey, error)
 }
 
 // Parser to deserialize a journey
@@ -54,4 +55,5 @@ type JourneyParser interface {
 // Usecases for a journey
 type JourneyUsecase interface {
 	ImportFromCSVFile(c *gin.Context, reader io.Reader) (int64, []string)
+	GetJourneys(c *gin.Context, errorChan chan<- error) <-chan []Journey
 }
